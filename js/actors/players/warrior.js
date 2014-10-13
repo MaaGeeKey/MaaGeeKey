@@ -8,7 +8,18 @@ module.exports = (function(){
 		hp:150,
 		attackDamage:40,
 		attackSpeed:140,
-		skills:[]
+		skills:[],
+		description:[
+			""
+		],
+		lines:{
+			hp:[
+				"dying",
+				"injured",
+				"hurt",
+				"healthy"
+			]
+		}
 	};
 	return Warrior;
 })();

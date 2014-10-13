@@ -8,7 +8,18 @@ module.exports = (function(){
 		hp:100,
 		attackDamage:50,
 		attackSpeed:100,
-		skills:[]
+		skills:[],
+		description:[
+			"a common creature among the woods. It is not dangerous at all."
+		],
+		descriptor:{
+			hp:[
+				"dying",
+				"injured",
+				"hurt",
+				"healthy"
+			]
+		}
 	};
 	return Slime;
 })();

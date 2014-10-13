@@ -1,4 +1,114 @@
 (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);throw new Error("Cannot find module '"+o+"'")}var f=n[o]={exports:{}};t[o][0].call(f.exports,function(e){var n=t[o][1][e];return s(n?n:e)},f,f.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
+// include
+
+// main
+module.exports = (function(){
+	function Fighter(data,override){
+		this._name = data.name;
+		this.data = data;
+		this.state = {
+			hp:this.data.hp
+		};
+	}
+
+	// public vaariable
+	var p = Fighter.prototype;
+	p.getHP = function getHP(){
+		return this.state.hp;
+	};
+	p.getHPMAX = function getHPMAX(){
+		return this.data.hp;
+	};
+	p.getHPDescriptor = function getHPDescriptor(){
+		var hpPercent = this.getHP() / this.getHPMAX();
+		var lineID = Math.floor((this.data.descriptor.hp.length-1) * hpPercent);
+		return this.data.descriptor.hp[lineID];
+	};
+	p.getSkills = function getSkills(){
+		return this.data.skills;
+	};
+	p.getName = function getName(){
+		return this.data.name;
+	};
+	p.getDescription = function getDescription(){
+		return this.data.description;
+	};
+	p.describe = function describe(){
+		var str = this.getName();
+		str+=" is "+ this.getDescription();
+		str+="\nIt looks "+ this.getHPDescriptor();
+		return str;
+	};
+	
+
+	return Fighter;
+})();
+},{}],2:[function(require,module,exports){
+// include
+
+// main
+module.exports = (function(){
+	var Slime = {
+		name:"Slime",
+		lv:1,
+		hp:100,
+		attackDamage:50,
+		attackSpeed:100,
+		skills:[],
+		description:[
+			"a common creature among the woods. It is not dangerous at all."
+		],
+		descriptor:{
+			hp:[
+				"dying",
+				"injured",
+				"hurt",
+				"healthy"
+			]
+		}
+	};
+	return Slime;
+})();
+},{}],3:[function(require,module,exports){
+// include
+
+// main
+module.exports = (function(){
+	var Warrior = {
+		name:"Warrior",
+		lv:1,
+		hp:150,
+		attackDamage:40,
+		attackSpeed:140,
+		skills:[],
+		description:[
+			""
+		],
+		lines:{
+			hp:[
+				"dying",
+				"injured",
+				"hurt",
+				"healthy"
+			]
+		}
+	};
+	return Warrior;
+})();
+},{}],4:[function(require,module,exports){
+
+//var $ = require("jquery");
+
+module.exports = (function() {
+
+	return {
+		system:{
+			screenRatio:9/16
+		}
+	};
+
+})();
+},{}],5:[function(require,module,exports){
 var ss = require("./system/screenSize");
 var $ = require("jquery");
 var Game = require("./game");
@@ -18,31 +128,40 @@ $(function() {
 	game.start(); 
 
 });
-},{"./game":2,"./output":3,"./system/screenSize":4,"jquery":5}],2:[function(require,module,exports){
+},{"./game":6,"./output":7,"./system/screenSize":8,"jquery":9}],6:[function(require,module,exports){
 
 //var $ = require("jquery");
+var Fighter = require("./actors/fighter");
+var warrior = require("./actors/players/warrior");
+var slime = require("./actors/monsters/slime");
 
 module.exports = (function() {
 
 	return function createNewBattle(output){
 		var battle = {};
-		battle.Out = output;
+		battle.out = output;
 		battle.start = start;
 		battle.nextBeat = nextBeat;
-		//battle.
+		battle.players = [];
+		battle.enemies=[];
 		return battle;
 	};
 
 	function start(){
-		this.Out.line("A wild Slime appeared!");
+		this.players.push(new Fighter(warrior));
+		this.enemies.push(new Fighter(slime));
+		this.out.line("A wild "+this.enemies[0].getName()+" appeared!");
+		this.out.line(this.enemies[0].describe());
+		this.nextBeat();
 	}
 
-	function nextBeat(){
+	function nextBeat(){ 
+		this.out.line("What would you like to do?");
 
 	}
 
 })();
-},{}],3:[function(require,module,exports){
+},{"./actors/fighter":1,"./actors/monsters/slime":2,"./actors/players/warrior":3}],7:[function(require,module,exports){
 
 var $ = require("jquery");
 
@@ -54,7 +173,7 @@ module.exports = (function(output_div) {
 	Output.line = function line(msg){
 		var p = document.createElement("p");
 		p.innerHTML = msg;
-		
+
 		this.outputDiv.appendChild(p);
 
 	};
@@ -63,11 +182,12 @@ module.exports = (function(output_div) {
 	return Output;
 
 });
-},{"jquery":5}],4:[function(require,module,exports){
+},{"jquery":9}],8:[function(require,module,exports){
 var $ = require("jquery");
+var config = require("../config");
 
 module.exports = function resizeGameScreen(){
-	var ratio = 16/9;
+	var ratio = config.system.screenRatio;
 	var win = {width: $(window).width(), height:$(window).height()};
 	win.ratio = win.width/win.height;
 
@@ -84,7 +204,7 @@ module.exports = function resizeGameScreen(){
 	}
 };
 
-},{"jquery":5}],5:[function(require,module,exports){
+},{"../config":4,"jquery":9}],9:[function(require,module,exports){
 /*!
  * jQuery JavaScript Library v2.1.1
  * http://jquery.com/
@@ -9276,4 +9396,4 @@ return jQuery;
 
 }));
 
-},{}]},{},[1])
+},{}]},{},[5])

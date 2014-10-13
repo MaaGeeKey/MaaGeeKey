@@ -1,7 +1,8 @@
 var $ = require("jquery");
+var config = require("../config");
 
 module.exports = function resizeGameScreen(){
-	var ratio = 16/9;
+	var ratio = config.system.screenRatio;
 	var win = {width: $(window).width(), height:$(window).height()};
 	win.ratio = win.width/win.height;
 

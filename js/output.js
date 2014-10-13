@@ -9,7 +9,7 @@ module.exports = (function(output_div) {
 	Output.line = function line(msg){
 		var p = document.createElement("p");
 		p.innerHTML = msg;
-		
+
 		this.outputDiv.appendChild(p);
 
 	};
