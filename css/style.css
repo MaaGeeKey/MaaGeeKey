@@ -1,0 +1,33 @@
+body{
+	overflow:hidden;
+}
+#game{
+	position:absolute;
+	margin: 0 auto;
+	width:10px;
+	height:10px;
+
+}
+
+#main{
+	width:70%;
+	height:100%;
+	float:left;
+	background-color: #EEA;
+}
+#player{
+	width:30%;
+	height:100%;
+	float:left;
+	background-color: #CDD;
+}
+#story{
+	background-color: #AEA;
+	height:60%;
+	padding:8px;
+}
+#action{
+	background-color: #EAA;
+	height:40%;
+	pointer-event:none;
+}
