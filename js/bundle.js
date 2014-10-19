@@ -1,5 +1,6 @@
 (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);throw new Error("Cannot find module '"+o+"'")}var f=n[o]={exports:{}};t[o][0].call(f.exports,function(e){var n=t[o][1][e];return s(n?n:e)},f,f.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
 // include
+var Util = require("../system/util");
 
 // main
 module.exports = (function(){
@@ -20,8 +21,11 @@ module.exports = (function(){
 	p.getHPMAX = function getHPMAX(){
 		return this.data.hp;
 	};
+	p.getHPPercent = function getHPPercent(){
+		return this.getHP() / this.getHPMAX();
+	};
 	p.getHPDescriptor = function getHPDescriptor(){
-		var hpPercent = this.getHP() / this.getHPMAX();
+		var hpPercent = this.getHPPercent();
 		var lineID = Math.floor((this.data.descriptor.hp.length-1) * hpPercent);
 		return this.data.descriptor.hp[lineID];
 	};
@@ -40,11 +44,44 @@ module.exports = (function(){
 		str+="\nIt looks "+ this.getHPDescriptor();
 		return str;
 	};
-	
+	p.getAttackLine = function getAttackLine(){
+		var i = Math.floor(Math.random() * this.data.lines.attack.length);
+		return this.data.lines.attack[i];
+	};
+	p.attack = function attack(target){
+		var msg = Util.stringReplace(
+			this.getAttackLine(),
+			"You",
+			"the "+target.getName()
+		);
+		var damage = this.data.attackDamage * Util.getRandomDamageModifier();
+
+		if(damage >= target.state.hp){ // killing
+			if(target.getHPPercent()==1){
+				msg+="instantly defeating it.";
+			}else{
+				msg+="and you defeated it.";
+			}
+		}else{ // damaging
+			var attackDamageRatio = damage / target.state.hp;
+			if(attackDamageRatio>=0.5){
+				msg+="dealing a massive blow at it.";
+			}else if (attackDamageRatio>=0.2){
+				msg+="dealing significant damage to it.";
+			}else{
+				msg+="and it was not very effective.";
+			}
+		}
+
+		target.state.hp -= damage;
+
+		return msg;
+	};
 
 	return Fighter;
+
 })();
-},{}],2:[function(require,module,exports){
+},{"../system/util":9}],2:[function(require,module,exports){
 // include
 
 // main
@@ -59,12 +96,17 @@ module.exports = (function(){
 		description:[
 			"a common creature among the woods. It is not dangerous at all."
 		],
-		descriptor:{
+		lines:{
+			
 			hp:[
 				"dying",
 				"injured",
 				"hurt",
 				"healthy"
+			],
+			attack:[
+				"{1} leap into the air and deliver a straight chop into {2}, ",
+				"{1} dash across {2} and slice through the side, "
 			]
 		}
 	};
@@ -91,6 +133,10 @@ module.exports = (function(){
 				"injured",
 				"hurt",
 				"healthy"
+			],
+			attack:[
+				"{1} leap into the air and deliver a straight chop into {2}, ",
+				"{1} dash across {2} and slice through the side, "
 			]
 		}
 	};
@@ -105,6 +151,10 @@ module.exports = (function() {
 	return {
 		system:{
 			screenRatio:9/16
+		},
+		battle:{
+			defaultAttackModifierMin:0.3,
+			defaultAttackModifierMax:1.2
 		}
 	};
 
@@ -131,9 +181,10 @@ $(function() {
 	game.start(); 
 
 });
-},{"./game":6,"./io":7,"./system/screenSize":8,"jquery":9}],6:[function(require,module,exports){
+},{"./game":6,"./io":7,"./system/screenSize":8,"jquery":10}],6:[function(require,module,exports){
 
 //var $ = require("jquery");
+var Util = require("./system/util");
 var Fighter = require("./actors/fighter");
 var warrior = require("./actors/players/warrior");
 var slime = require("./actors/monsters/slime");
@@ -156,22 +207,46 @@ module.exports = (function() {
 		this.players.concat(this.enemies).forEach(function(element){
 			element.state.cooldown=0;
 		});
-		this.io.line("A wild %b challenges you!", this.enemies[0].getName());
+		//this.io.line("A wild "+this.enemies[0].getName()+" challenges you!");
+		this.io.line(Util.stringReplace(
+			"A wild {1} challenges you!",
+			this.enemies[0].getName()
+		));
 		this.nextBeat();
 	}
 
 	function nextBeat(){
+		var _this = this;
 		this.io.ask(
 			"What would you like to do?",
 			["Inspect","Attack","Defence","Evade","Parry",],
-			function(i){alert(i);}
+			function nextBeatCallback(cmd){
+				switch(cmd){
+					case "Inspect":
+					_this.io.line(_this.enemies[0].describe());
+					break;
+					case "Attack":
+					var msg = _this.players[0].attack(_this.enemies[0]);
+					_this.io.line(msg);
+					break;
+					case "Defence":
+					break;
+					case "Evade":
+					break;
+					case "Parry":
+					break;
+					default:
+				}
+			}
 		);
 
 	}
 
+	
+
 })();
 
-},{"./actors/fighter":1,"./actors/monsters/slime":2,"./actors/players/warrior":3}],7:[function(require,module,exports){
+},{"./actors/fighter":1,"./actors/monsters/slime":2,"./actors/players/warrior":3,"./system/util":9}],7:[function(require,module,exports){
 
 var $ = require("jquery");
 
@@ -181,9 +256,9 @@ module.exports = (function(input_div,output_div) {
 	IOController. inputDiv =  input_div;
 	IOController.outputDiv = output_div;
 
-	IOController.line = function line(msg){
+	IOController.line = function line(){
 		var p = document.createElement("p");
-		p.appendChild(document.createTextNode(msg));
+		p.appendChild(document.createTextNode(arguments[0]));
 
 		this.outputDiv.appendChild(p);
 	};
@@ -196,33 +271,29 @@ module.exports = (function(input_div,output_div) {
 	 * @return {bool}            success or not
 	 */
 	IOController.ask = function ask(question,choices,callback){
+		var _this = this;
 		// create a <p> with the question
-		var d = document.createElement("div");
+		var div = document.createElement("div");
 
 		var p = document.createElement("p");
 		p.innerHTML = question;
 		//p.appendChild(document.createTextNode(question));
-		this.inputDiv.appendChild(p);
+		div.appendChild(p);
 
     	var b;
     	for(var i=0; i < choices.length; i++){
 	    	b = document.createElement("button");
 			b.appendChild(document.createTextNode(choices[i]));
-			b.buttonIndex=i;
-			b.addEventListener("click",function(){
-				callback(this.buttonIndex);
-			});
-			this.inputDiv.appendChild(b);
+			b.actionLabel=choices[i];
+			b.addEventListener("click",buttonClickCallback);
+			div.appendChild(b);
 
-			// escape the closure property of variable i
-			// tell button b to call callback with parameters
-			/*
-			(function(a){
-				b.addEventListener("click",function(){
-					callback(a);
-				});
-			})(i);
-			*/
+		}
+		this.inputDiv.appendChild(div);
+
+		function buttonClickCallback(){
+			callback(this.actionLabel);
+			_this.inputDiv.removeChild(div);
 		}
 
 	};
@@ -232,7 +303,7 @@ module.exports = (function(input_div,output_div) {
 
 });
 
-},{"jquery":9}],8:[function(require,module,exports){
+},{"jquery":10}],8:[function(require,module,exports){
 var $ = require("jquery");
 var config = require("../config");
 
@@ -254,7 +325,51 @@ module.exports = function resizeGameScreen(){
 	}
 };
 
-},{"../config":4,"jquery":9}],9:[function(require,module,exports){
+},{"../config":4,"jquery":10}],9:[function(require,module,exports){
+//var $ = require("jquery");
+var Config = require("../config");
+module.exports = (function (){
+	var Util = {};
+
+	/**
+	 * modifies targetObj to fill in missing default values
+	 * useful for function options
+	 * @param  {Value Object} targetObj  given options object
+	 * @param  {Value Object} defaultObj object of expected values and their default values
+	 */
+	Util.mergeDefault = function mergeDefault(targetObj, defaultObj){
+		for (var attrname in defaultObj) {
+			if (!targetObj.hasOwnProperty(attrname)) {
+				targetObj[attrname] = defaultObj[attrname];
+			}
+		}
+	};
+	/**
+	 * String stringReplace(str[,replacements...]);
+	 * formats the strings, replaces placeholders like {1} with arguments
+	 * {1} counts from 1
+	 * @return {[type]} [description]
+	 */
+	Util.stringReplace = function stringReplace(){
+		var args = arguments;
+		console.log(args);
+		return args[0].replace(/{(\d+)}/g, function(match, number) {
+
+			return typeof args[number] != 'undefined'?args[number]:match;
+		});
+	};
+
+
+	Util.getRandomDamageModifier = function getRandomDamageModifier(){
+		var min = Config.battle.defaultAttackModifierMin;
+		var max = Config.battle.defaultAttackModifierMax;
+		return Math.random()*(max-min)  + min;
+	};
+
+	return Util;
+})();
+
+},{"../config":4}],10:[function(require,module,exports){
 /*!
  * jQuery JavaScript Library v2.1.1
  * http://jquery.com/

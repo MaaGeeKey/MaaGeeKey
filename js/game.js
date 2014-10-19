@@ -1,6 +1,6 @@
 
 //var $ = require("jquery");
-var Util = require("system/util");
+var Util = require("./system/util");
 var Fighter = require("./actors/fighter");
 var warrior = require("./actors/players/warrior");
 var slime = require("./actors/monsters/slime");
@@ -25,19 +25,40 @@ module.exports = (function() {
 		});
 		//this.io.line("A wild "+this.enemies[0].getName()+" challenges you!");
 		this.io.line(Util.stringReplace(
-			"A wild {0} challenges you!",
+			"A wild {1} challenges you!",
 			this.enemies[0].getName()
 		));
 		this.nextBeat();
 	}
 
 	function nextBeat(){
+		var _this = this;
 		this.io.ask(
 			"What would you like to do?",
 			["Inspect","Attack","Defence","Evade","Parry",],
-			function(i){alert(i);}
+			function nextBeatCallback(cmd){
+				switch(cmd){
+					case "Inspect":
+					_this.io.line(_this.enemies[0].describe());
+					break;
+					case "Attack":
+					var msg = _this.players[0].attack(_this.enemies[0]);
+					_this.io.line(msg);
+					break;
+					case "Defence":
+					
+					break;
+					case "Evade":
+					break;
+					case "Parry":
+					break;
+					default:
+				}
+			}
 		);
 
 	}
+
+	
 
 })();

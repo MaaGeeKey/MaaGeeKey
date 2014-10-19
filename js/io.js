@@ -22,33 +22,29 @@ module.exports = (function(input_div,output_div) {
 	 * @return {bool}            success or not
 	 */
 	IOController.ask = function ask(question,choices,callback){
+		var _this = this;
 		// create a <p> with the question
-		var d = document.createElement("div");
+		var div = document.createElement("div");
 
 		var p = document.createElement("p");
 		p.innerHTML = question;
 		//p.appendChild(document.createTextNode(question));
-		this.inputDiv.appendChild(p);
+		div.appendChild(p);
 
     	var b;
     	for(var i=0; i < choices.length; i++){
 	    	b = document.createElement("button");
 			b.appendChild(document.createTextNode(choices[i]));
-			b.buttonIndex=i;
-			b.addEventListener("click",function(){
-				callback(this.buttonIndex);
-			});
-			this.inputDiv.appendChild(b);
+			b.actionLabel=choices[i];
+			b.addEventListener("click",buttonClickCallback);
+			div.appendChild(b);
 
-			// escape the closure property of variable i
-			// tell button b to call callback with parameters
-			/*
-			(function(a){
-				b.addEventListener("click",function(){
-					callback(a);
-				});
-			})(i);
-			*/
+		}
+		this.inputDiv.appendChild(div);
+
+		function buttonClickCallback(){
+			callback(this.actionLabel);
+			_this.inputDiv.removeChild(div);
 		}
 
 	};

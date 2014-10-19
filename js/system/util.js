@@ -1,6 +1,5 @@
 //var $ = require("jquery");
-//var config = require("../config");
-
+var Config = require("../config");
 module.exports = (function (){
 	var Util = {};
 
@@ -17,15 +16,25 @@ module.exports = (function (){
 			}
 		}
 	};
-
+	/**
+	 * String stringReplace(str[,replacements...]);
+	 * formats the strings, replaces placeholders like {1} with arguments
+	 * {1} counts from 1
+	 * @return {[type]} [description]
+	 */
 	Util.stringReplace = function stringReplace(){
 		var args = arguments;
-		return args[0].replace(/{(\d+)}/g, function(match, number) { 
-			return typeof args[number+1] != 'undefined'
-				? args[number+1]
-				: match
-			;
+		console.log(args);
+		return args[0].replace(/{(\d+)}/g, function(match, number) {
+			return typeof args[number] != 'undefined'?args[number]:match;
 		});
+	};
+
+
+	Util.getRandomDamageModifier = function getRandomDamageModifier(){
+		var min = Config.battle.defaultAttackModifierMin;
+		var max = Config.battle.defaultAttackModifierMax;
+		return Math.random()*(max-min) + min;
 	};
 
 	return Util;
