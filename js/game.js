@@ -1,14 +1,15 @@
 
 //var $ = require("jquery");
+var Util = require("system/util");
 var Fighter = require("./actors/fighter");
 var warrior = require("./actors/players/warrior");
 var slime = require("./actors/monsters/slime");
 
 module.exports = (function() {
 
-	return function createNewBattle(output){
+	return function createNewBattle(IO){
 		var battle = {};
-		battle.out = output;
+		battle.io = IO;
 		battle.start = start;
 		battle.nextBeat = nextBeat;
 		battle.players = [];
@@ -19,13 +20,23 @@ module.exports = (function() {
 	function start(){
 		this.players.push(new Fighter(warrior));
 		this.enemies.push(new Fighter(slime));
-		this.out.line("A wild "+this.enemies[0].getName()+" appeared!");
-		this.out.line(this.enemies[0].describe());
+		this.players.concat(this.enemies).forEach(function(element){
+			element.state.cooldown=0;
+		});
+		//this.io.line("A wild "+this.enemies[0].getName()+" challenges you!");
+		this.io.line(Util.stringReplace(
+			"A wild {0} challenges you!",
+			this.enemies[0].getName()
+		));
 		this.nextBeat();
 	}
 
-	function nextBeat(){ 
-		this.out.line("What would you like to do?");
+	function nextBeat(){
+		this.io.ask(
+			"What would you like to do?",
+			["Inspect","Attack","Defence","Evade","Parry",],
+			function(i){alert(i);}
+		);
 
 	}
 

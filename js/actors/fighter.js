@@ -6,7 +6,8 @@ module.exports = (function(){
 		this._name = data.name;
 		this.data = data;
 		this.state = {
-			hp:this.data.hp
+			hp:this.data.hp,
+			cooldown:0
 		};
 	}
 

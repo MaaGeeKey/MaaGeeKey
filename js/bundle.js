@@ -7,7 +7,8 @@ module.exports = (function(){
 		this._name = data.name;
 		this.data = data;
 		this.state = {
-			hp:this.data.hp
+			hp:this.data.hp,
+			cooldown:0
 		};
 	}
 
@@ -112,7 +113,7 @@ module.exports = (function() {
 var ss = require("./system/screenSize");
 var $ = require("jquery");
 var Game = require("./game");
-var Output = require("./output");
+var IOController = require("./io");
 
 $(function() {
 	// bind windows resize to screenSize.js
@@ -120,15 +121,17 @@ $(function() {
 	// initial run
 	ss();
 
-	var div=$("#story").get()[0];
-	var output = Output(div);
+	var output_div=$("#story").get()[0];
+	var input_div=$("#action").get()[0];
 
-	var game = Game(output);
+	var io = IOController(input_div,output_div);
+
+	var game = Game(io);
 	window.gm = game;
 	game.start(); 
 
 });
-},{"./game":6,"./output":7,"./system/screenSize":8,"jquery":9}],6:[function(require,module,exports){
+},{"./game":6,"./io":7,"./system/screenSize":8,"jquery":9}],6:[function(require,module,exports){
 
 //var $ = require("jquery");
 var Fighter = require("./actors/fighter");
@@ -137,9 +140,9 @@ var slime = require("./actors/monsters/slime");
 
 module.exports = (function() {
 
-	return function createNewBattle(output){
+	return function createNewBattle(IO){
 		var battle = {};
-		battle.out = output;
+		battle.io = IO;
 		battle.start = start;
 		battle.nextBeat = nextBeat;
 		battle.players = [];
@@ -150,38 +153,85 @@ module.exports = (function() {
 	function start(){
 		this.players.push(new Fighter(warrior));
 		this.enemies.push(new Fighter(slime));
-		this.out.line("A wild "+this.enemies[0].getName()+" appeared!");
-		this.out.line(this.enemies[0].describe());
+		this.players.concat(this.enemies).forEach(function(element){
+			element.state.cooldown=0;
+		});
+		this.io.line("A wild %b challenges you!", this.enemies[0].getName());
 		this.nextBeat();
 	}
 
-	function nextBeat(){ 
-		this.out.line("What would you like to do?");
+	function nextBeat(){
+		this.io.ask(
+			"What would you like to do?",
+			["Inspect","Attack","Defence","Evade","Parry",],
+			function(i){alert(i);}
+		);
 
 	}
 
 })();
+
 },{"./actors/fighter":1,"./actors/monsters/slime":2,"./actors/players/warrior":3}],7:[function(require,module,exports){
 
 var $ = require("jquery");
 
-module.exports = (function(output_div) {
+module.exports = (function(input_div,output_div) {
 
-	var Output = {};
-	Output.outputDiv = output_div;
+	var IOController = {};
+	IOController. inputDiv =  input_div;
+	IOController.outputDiv = output_div;
 
-	Output.line = function line(msg){
+	IOController.line = function line(msg){
 		var p = document.createElement("p");
-		p.innerHTML = msg;
+		p.appendChild(document.createTextNode(msg));
 
 		this.outputDiv.appendChild(p);
+	};
+
+	/**
+	 * ask(question,choices)
+	 * ask a question
+	 * @param  {string} question an HTML question for player
+	 * @param  {array}  choices  array of choices, and their callbacks
+	 * @return {bool}            success or not
+	 */
+	IOController.ask = function ask(question,choices,callback){
+		// create a <p> with the question
+		var d = document.createElement("div");
+
+		var p = document.createElement("p");
+		p.innerHTML = question;
+		//p.appendChild(document.createTextNode(question));
+		this.inputDiv.appendChild(p);
+
+    	var b;
+    	for(var i=0; i < choices.length; i++){
+	    	b = document.createElement("button");
+			b.appendChild(document.createTextNode(choices[i]));
+			b.buttonIndex=i;
+			b.addEventListener("click",function(){
+				callback(this.buttonIndex);
+			});
+			this.inputDiv.appendChild(b);
+
+			// escape the closure property of variable i
+			// tell button b to call callback with parameters
+			/*
+			(function(a){
+				b.addEventListener("click",function(){
+					callback(a);
+				});
+			})(i);
+			*/
+		}
 
 	};
 
 
-	return Output;
+	return IOController;
 
 });
+
 },{"jquery":9}],8:[function(require,module,exports){
 var $ = require("jquery");
 var config = require("../config");
