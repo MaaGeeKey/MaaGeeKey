@@ -25,6 +25,10 @@ body{
 	background-color: #AEA;
 	height:60%;
 	padding:8px;
+	overflow:auto;
+}
+#story .line{
+	margin:8px 0;
 }
 #action{
 	background-color: #EAA;

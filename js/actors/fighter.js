@@ -3,13 +3,21 @@ var Util = require("../system/util");
 
 // main
 module.exports = (function(){
-	function Fighter(data,override){
-		this._name = data.name;
-		this.data = data;
+	function Fighter(base,pilot,options){
+		if(pilot == null) throw new Error("No pilot specified for '"+base.name+"'");
+		if(options){
+			Util.mergeDefault(options,{
+				overrideStat:null
+			});
+		}
+		this._name = base.name;
+		this.base = base;
 		this.state = {
-			hp:this.data.hp,
+			hp:this.base.hp,
 			cooldown:0
 		};
+		this.pilot = pilot;
+		this.pilot.fighter = this;
 	}
 
 	// public vaariable
@@ -18,24 +26,24 @@ module.exports = (function(){
 		return this.state.hp;
 	};
 	p.getHPMAX = function getHPMAX(){
-		return this.data.hp;
+		return this.base.hp;
 	};
 	p.getHPPercent = function getHPPercent(){
 		return this.getHP() / this.getHPMAX();
 	};
 	p.getHPDescriptor = function getHPDescriptor(){
 		var hpPercent = this.getHPPercent();
-		var lineID = Math.floor((this.data.descriptor.hp.length-1) * hpPercent);
-		return this.data.descriptor.hp[lineID];
+		var lineID = Math.floor((this.base.lines.hp.length-1) * hpPercent);
+		return this.base.lines.hp[lineID];
 	};
 	p.getSkills = function getSkills(){
-		return this.data.skills;
+		return this.base.skills;
 	};
 	p.getName = function getName(){
-		return this.data.name;
+		return this.base.name;
 	};
 	p.getDescription = function getDescription(){
-		return this.data.description;
+		return this.base.description;
 	};
 	p.describe = function describe(){
 		var str = this.getName();
@@ -44,8 +52,8 @@ module.exports = (function(){
 		return str;
 	};
 	p.getAttackLine = function getAttackLine(){
-		var i = Math.floor(Math.random() * this.data.lines.attack.length);
-		return this.data.lines.attack[i];
+		var i = Math.floor(Math.random() * this.base.lines.attack.length);
+		return this.base.lines.attack[i];
 	};
 	p.attack = function attack(target){
 		var msg = Util.stringReplace(
@@ -53,7 +61,7 @@ module.exports = (function(){
 			"You",
 			"the "+target.getName()
 		);
-		var damage = this.data.attackDamage * Util.getRandomDamageModifier();
+		var damage = this.base.attackDamage * Util.getRandomDamageModifier();
 
 		if(damage >= target.state.hp){ // killing
 			if(target.getHPPercent()==1){

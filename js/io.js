@@ -9,9 +9,11 @@ module.exports = (function(input_div,output_div) {
 
 	IOController.line = function line(){
 		var p = document.createElement("p");
+		p.className=" line ";
 		p.appendChild(document.createTextNode(arguments[0]));
 
 		this.outputDiv.appendChild(p);
+		this.outputDiv.scrollTop = this.outputDiv.scrollHeight;
 	};
 
 	/**
@@ -43,8 +45,10 @@ module.exports = (function(input_div,output_div) {
 		this.inputDiv.appendChild(div);
 
 		function buttonClickCallback(){
-			callback(this.actionLabel);
-			_this.inputDiv.removeChild(div);
+			var resolved = callback(this.actionLabel);
+			if(resolved){
+				_this.inputDiv.removeChild(div);
+			}
 		}
 
 	};

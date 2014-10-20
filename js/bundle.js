@@ -4,13 +4,21 @@ var Util = require("../system/util");
 
 // main
 module.exports = (function(){
-	function Fighter(data,override){
-		this._name = data.name;
-		this.data = data;
+	function Fighter(base,pilot,options){
+		if(pilot == null) throw new Error("No pilot specified for '"+base.name+"'");
+		if(options){
+			Util.mergeDefault(options,{
+				overrideStat:null
+			});
+		}
+		this._name = base.name;
+		this.base = base;
 		this.state = {
-			hp:this.data.hp,
+			hp:this.base.hp,
 			cooldown:0
 		};
+		this.pilot = pilot;
+		this.pilot.fighter = this;
 	}
 
 	// public vaariable
@@ -19,24 +27,24 @@ module.exports = (function(){
 		return this.state.hp;
 	};
 	p.getHPMAX = function getHPMAX(){
-		return this.data.hp;
+		return this.base.hp;
 	};
 	p.getHPPercent = function getHPPercent(){
 		return this.getHP() / this.getHPMAX();
 	};
 	p.getHPDescriptor = function getHPDescriptor(){
 		var hpPercent = this.getHPPercent();
-		var lineID = Math.floor((this.data.descriptor.hp.length-1) * hpPercent);
-		return this.data.descriptor.hp[lineID];
+		var lineID = Math.floor((this.base.lines.hp.length-1) * hpPercent);
+		return this.base.lines.hp[lineID];
 	};
 	p.getSkills = function getSkills(){
-		return this.data.skills;
+		return this.base.skills;
 	};
 	p.getName = function getName(){
-		return this.data.name;
+		return this.base.name;
 	};
 	p.getDescription = function getDescription(){
-		return this.data.description;
+		return this.base.description;
 	};
 	p.describe = function describe(){
 		var str = this.getName();
@@ -45,8 +53,8 @@ module.exports = (function(){
 		return str;
 	};
 	p.getAttackLine = function getAttackLine(){
-		var i = Math.floor(Math.random() * this.data.lines.attack.length);
-		return this.data.lines.attack[i];
+		var i = Math.floor(Math.random() * this.base.lines.attack.length);
+		return this.base.lines.attack[i];
 	};
 	p.attack = function attack(target){
 		var msg = Util.stringReplace(
@@ -54,7 +62,7 @@ module.exports = (function(){
 			"You",
 			"the "+target.getName()
 		);
-		var damage = this.data.attackDamage * Util.getRandomDamageModifier();
+		var damage = this.base.attackDamage * Util.getRandomDamageModifier();
 
 		if(damage >= target.state.hp){ // killing
 			if(target.getHPPercent()==1){
@@ -81,13 +89,15 @@ module.exports = (function(){
 	return Fighter;
 
 })();
-},{"../system/util":9}],2:[function(require,module,exports){
+
+},{"../system/util":10}],2:[function(require,module,exports){
 // include
 
 // main
 module.exports = (function(){
 	var Slime = {
 		name:"Slime",
+		gender:"IT",
 		lv:1,
 		hp:100,
 		attackDamage:50,
@@ -97,7 +107,6 @@ module.exports = (function(){
 			"a common creature among the woods. It is not dangerous at all."
 		],
 		lines:{
-			
 			hp:[
 				"dying",
 				"injured",
@@ -113,19 +122,41 @@ module.exports = (function(){
 	return Slime;
 })();
 },{}],3:[function(require,module,exports){
+//var $ = require("jquery");
+//var Config = require("../config");
+module.exports = (function (){
+	function AIPacifist(io){
+		this.fighter = null;
+		this.io = io;
+	}
+	var p = AIPacifist.prototype;
+
+	p.nextMove = function nextMove(){
+		var resolved = false;
+		this.io.line(this.fighter.base.name+"does nothing.");
+		resolved = true;
+		return resolved;
+	};
+
+
+	return AIPacifist;
+})();
+
+},{}],4:[function(require,module,exports){
 // include
 
 // main
 module.exports = (function(){
 	var Warrior = {
 		name:"Warrior",
+		gender:"HE",
 		lv:1,
 		hp:150,
 		attackDamage:40,
 		attackSpeed:140,
 		skills:[],
 		description:[
-			""
+			"a warrior with a sword. "
 		],
 		lines:{
 			hp:[
@@ -142,7 +173,8 @@ module.exports = (function(){
 	};
 	return Warrior;
 })();
-},{}],4:[function(require,module,exports){
+
+},{}],5:[function(require,module,exports){
 
 //var $ = require("jquery");
 
@@ -159,7 +191,7 @@ module.exports = (function() {
 	};
 
 })();
-},{}],5:[function(require,module,exports){
+},{}],6:[function(require,module,exports){
 var ss = require("./system/screenSize");
 var $ = require("jquery");
 var Game = require("./game");
@@ -181,13 +213,14 @@ $(function() {
 	game.start(); 
 
 });
-},{"./game":6,"./io":7,"./system/screenSize":8,"jquery":10}],6:[function(require,module,exports){
+},{"./game":7,"./io":8,"./system/screenSize":9,"jquery":11}],7:[function(require,module,exports){
 
 //var $ = require("jquery");
 var Util = require("./system/util");
 var Fighter = require("./actors/fighter");
 var warrior = require("./actors/players/warrior");
 var slime = require("./actors/monsters/slime");
+var AIPacifist = require("./actors/pilots/aiPacifist");
 
 module.exports = (function() {
 
@@ -202,8 +235,8 @@ module.exports = (function() {
 	};
 
 	function start(){
-		this.players.push(new Fighter(warrior));
-		this.enemies.push(new Fighter(slime));
+		this.players.push(new Fighter(warrior,new AIPacifist(this.io)));
+		this.enemies.push(new Fighter(slime,new AIPacifist(this.io)));
 		this.players.concat(this.enemies).forEach(function(element){
 			element.state.cooldown=0;
 		});
@@ -219,24 +252,34 @@ module.exports = (function() {
 		var _this = this;
 		this.io.ask(
 			"What would you like to do?",
-			["Inspect","Attack","Defence","Evade","Parry",],
+			["Inspect","Attack","Guard","Evade","Skills","Use item"],
 			function nextBeatCallback(cmd){
+				var resolved = false;
 				switch(cmd){
 					case "Inspect":
 					_this.io.line(_this.enemies[0].describe());
+					resolved = true;
 					break;
 					case "Attack":
 					var msg = _this.players[0].attack(_this.enemies[0]);
 					_this.io.line(msg);
+					resolved = true;
 					break;
-					case "Defence":
+					case "Guard":
+					_this.io.line("Cannot guard at the moment. Please choose another action.");
 					break;
 					case "Evade":
+					_this.io.line("Cannot evade at the moment. Please choose another action.");
 					break;
-					case "Parry":
+					case "Skills":
+					_this.io.line("Skill system not ready. Please choose another action.");
+					break;
+					case "Use item":
+					_this.io.line("Item system not ready. Please choose another action.");
 					break;
 					default:
 				}
+				return resolved;
 			}
 		);
 
@@ -246,7 +289,7 @@ module.exports = (function() {
 
 })();
 
-},{"./actors/fighter":1,"./actors/monsters/slime":2,"./actors/players/warrior":3,"./system/util":9}],7:[function(require,module,exports){
+},{"./actors/fighter":1,"./actors/monsters/slime":2,"./actors/pilots/aiPacifist":3,"./actors/players/warrior":4,"./system/util":10}],8:[function(require,module,exports){
 
 var $ = require("jquery");
 
@@ -258,9 +301,11 @@ module.exports = (function(input_div,output_div) {
 
 	IOController.line = function line(){
 		var p = document.createElement("p");
+		p.className=" line ";
 		p.appendChild(document.createTextNode(arguments[0]));
 
 		this.outputDiv.appendChild(p);
+		this.outputDiv.scrollTop = this.outputDiv.scrollHeight;
 	};
 
 	/**
@@ -292,8 +337,10 @@ module.exports = (function(input_div,output_div) {
 		this.inputDiv.appendChild(div);
 
 		function buttonClickCallback(){
-			callback(this.actionLabel);
-			_this.inputDiv.removeChild(div);
+			var resolved = callback(this.actionLabel);
+			if(resolved){
+				_this.inputDiv.removeChild(div);
+			}
 		}
 
 	};
@@ -303,7 +350,7 @@ module.exports = (function(input_div,output_div) {
 
 });
 
-},{"jquery":10}],8:[function(require,module,exports){
+},{"jquery":11}],9:[function(require,module,exports){
 var $ = require("jquery");
 var config = require("../config");
 
@@ -325,7 +372,7 @@ module.exports = function resizeGameScreen(){
 	}
 };
 
-},{"../config":4,"jquery":10}],9:[function(require,module,exports){
+},{"../config":5,"jquery":11}],10:[function(require,module,exports){
 //var $ = require("jquery");
 var Config = require("../config");
 module.exports = (function (){
@@ -354,7 +401,6 @@ module.exports = (function (){
 		var args = arguments;
 		console.log(args);
 		return args[0].replace(/{(\d+)}/g, function(match, number) {
-
 			return typeof args[number] != 'undefined'?args[number]:match;
 		});
 	};
@@ -363,13 +409,13 @@ module.exports = (function (){
 	Util.getRandomDamageModifier = function getRandomDamageModifier(){
 		var min = Config.battle.defaultAttackModifierMin;
 		var max = Config.battle.defaultAttackModifierMax;
-		return Math.random()*(max-min)  + min;
+		return Math.random()*(max-min) + min;
 	};
 
 	return Util;
 })();
 
-},{"../config":4}],10:[function(require,module,exports){
+},{"../config":5}],11:[function(require,module,exports){
 /*!
  * jQuery JavaScript Library v2.1.1
  * http://jquery.com/
@@ -9561,4 +9607,4 @@ return jQuery;
 
 }));
 
-},{}]},{},[5])
+},{}]},{},[6])

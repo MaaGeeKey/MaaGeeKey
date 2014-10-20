@@ -4,6 +4,7 @@ var Util = require("./system/util");
 var Fighter = require("./actors/fighter");
 var warrior = require("./actors/players/warrior");
 var slime = require("./actors/monsters/slime");
+var AIPacifist = require("./actors/pilots/aiPacifist");
 
 module.exports = (function() {
 
@@ -18,8 +19,8 @@ module.exports = (function() {
 	};
 
 	function start(){
-		this.players.push(new Fighter(warrior));
-		this.enemies.push(new Fighter(slime));
+		this.players.push(new Fighter(warrior,new AIPacifist(this.io)));
+		this.enemies.push(new Fighter(slime,new AIPacifist(this.io)));
 		this.players.concat(this.enemies).forEach(function(element){
 			element.state.cooldown=0;
 		});
@@ -35,25 +36,34 @@ module.exports = (function() {
 		var _this = this;
 		this.io.ask(
 			"What would you like to do?",
-			["Inspect","Attack","Defence","Evade","Parry",],
+			["Inspect","Attack","Guard","Evade","Skills","Use item"],
 			function nextBeatCallback(cmd){
+				var resolved = false;
 				switch(cmd){
 					case "Inspect":
 					_this.io.line(_this.enemies[0].describe());
+					resolved = true;
 					break;
 					case "Attack":
 					var msg = _this.players[0].attack(_this.enemies[0]);
 					_this.io.line(msg);
+					resolved = true;
 					break;
-					case "Defence":
-					
+					case "Guard":
+					_this.io.line("Cannot guard at the moment. Please choose another action.");
 					break;
 					case "Evade":
+					_this.io.line("Cannot evade at the moment. Please choose another action.");
 					break;
-					case "Parry":
+					case "Skills":
+					_this.io.line("Skill system not ready. Please choose another action.");
+					break;
+					case "Use item":
+					_this.io.line("Item system not ready. Please choose another action.");
 					break;
 					default:
 				}
+				return resolved;
 			}
 		);
 
