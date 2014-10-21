@@ -1,4 +1,65 @@
 (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);throw new Error("Cannot find module '"+o+"'")}var f=n[o]={exports:{}};t[o][0].call(f.exports,function(e){var n=t[o][1][e];return s(n?n:e)},f,f.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
+// includes
+//var $ = require("jquery");
+var Util = require("./system/util");
+
+// creature that participate in the fight
+var Fighter = require("./creatures/fighter");
+var warrior = require("./creatures/players/warrior");
+var slime = require("./creatures/monsters/slime");
+// pilots
+var PlayerController = require("./creatures/pilots/playerControl");
+var AIPacifist = require("./creatures/pilots/aiPacifist");
+
+// body
+module.exports = (function() {
+
+	function Battle(ioController){
+		this.io = ioController;
+		this.players = [];
+		this.enemies = [];
+		this.queue = [];
+	}
+
+	var p = Battle.prototype;
+
+	// public methods
+	p.start = function start(){
+		this.players.push(new Fighter(warrior,new PlayerController(this.io)));
+		this.enemies.push(new Fighter(slime,new AIPacifist(this.io)));
+		this.queue = this.queue.concat(this.players).concat(this.enemies);
+		console.log(this.queue);
+		randomizeQueue(this.queue);
+		//this.io.line("A wild "+this.enemies[0].getName()+" challenges you!");
+		this.io.line(Util.stringReplace(
+			"A wild {1} challenges you!",
+			this.enemies[0].getName()
+		));
+		this.queue.sort(Fighter.sortByCooldown);
+		console.log(this.queue);
+		this.nextBeat();
+	};
+
+	p.nextBeat = function nextBeat(){
+		this.queue[0].doNextMove(this);
+
+		this.nextBeat();
+	}
+
+	return Battle;
+
+	// private functions
+	function randomizeQueue(queue){
+		queue.forEach(function(element){
+			element.state.cooldown = Math.floor(Math.random() * 100);
+		});
+	}
+
+	
+
+})();
+
+},{"./creatures/fighter":3,"./creatures/monsters/slime":4,"./creatures/pilots/aiPacifist":5,"./creatures/pilots/playerControl":6,"./creatures/players/warrior":7,"./system/util":11}],2:[function(require,module,exports){
 
 //var $ = require("jquery");
 
@@ -15,7 +76,7 @@ module.exports = (function() {
 	};
 
 })();
-},{}],2:[function(require,module,exports){
+},{}],3:[function(require,module,exports){
 // include
 var Util = require("../system/util");
 
@@ -118,7 +179,7 @@ module.exports = (function(){
 
 })();
 
-},{"../system/util":11}],3:[function(require,module,exports){
+},{"../system/util":11}],4:[function(require,module,exports){
 // include
 
 // main
@@ -149,7 +210,7 @@ module.exports = (function(){
 	};
 	return Slime;
 })();
-},{}],4:[function(require,module,exports){
+},{}],5:[function(require,module,exports){
 //var $ = require("jquery");
 //var Config = require("../config");
 module.exports = (function (){
@@ -159,6 +220,11 @@ module.exports = (function (){
 	}
 	var p = AIPacifist.prototype;
 
+	/**
+	 * perform the next move either by AI or by player
+	 * @param  {Battle} gameState [description]
+	 * @return {[type]}           [description]
+	 */
 	p.nextMove = function nextMove(gameState){
 		this.io.line(this.fighter.base.name+"does nothing.");
 		finishedCallback.call();
@@ -168,11 +234,11 @@ module.exports = (function (){
 	return AIPacifist;
 })();
 
-},{}],5:[function(require,module,exports){
+},{}],6:[function(require,module,exports){
 //var $ = require("jquery");
 //var Config = require("../config");
 
-var Battle = require()
+var Battle = require("../../battle");
 
 module.exports = (function (){
 	function PlayerControl(io){
@@ -228,7 +294,7 @@ module.exports = (function (){
 	return PlayerControl;
 })();
 
-},{}],6:[function(require,module,exports){
+},{"../../battle":1}],7:[function(require,module,exports){
 // include
 
 // main
@@ -260,10 +326,10 @@ module.exports = (function(){
 	return Warrior;
 })();
 
-},{}],7:[function(require,module,exports){
+},{}],8:[function(require,module,exports){
 // includes
 var $ = require("jquery");
-var Battle = require("./game");
+var Battle = require("./battle");
 var IOController = require("./io");
 var screenResizeHandler = require("./system/screenSize");
 
@@ -288,68 +354,7 @@ $(function() {
 	battle.start(); 
 
 });
-},{"./game":8,"./io":9,"./system/screenSize":10,"jquery":12}],8:[function(require,module,exports){
-// includes
-//var $ = require("jquery");
-var Util = require("./system/util");
-
-// creature that participate in the fight
-var Fighter = require("./creatures/fighter");
-var warrior = require("./creatures/players/warrior");
-var slime = require("./creatures/monsters/slime");
-// pilots
-var PlayerController = require("./creatures/pilots/playerControl");
-var AIPacifist = require("./creatures/pilots/aiPacifist");
-
-// body
-module.exports = (function() {
-
-	function Battle(ioController){
-		this.io = ioController;
-		this.players = [];
-		this.enemies = [];
-		this.queue = [];
-	}
-
-	var p = Battle.prototype;
-
-	// public methods
-	p.start = function start(){
-		this.players.push(new Fighter(warrior,new PlayerController(this.io)));
-		this.enemies.push(new Fighter(slime,new AIPacifist(this.io)));
-		this.queue = this.queue.concat(this.players).concat(this.enemies);
-		console.log(this.queue);
-		randomizeQueue(this.queue);
-		//this.io.line("A wild "+this.enemies[0].getName()+" challenges you!");
-		this.io.line(Util.stringReplace(
-			"A wild {1} challenges you!",
-			this.enemies[0].getName()
-		));
-		this.queue.sort(Fighter.sortByCooldown);
-		console.log(this.queue);
-		this.nextBeat();
-	};
-
-	p.nextBeat = function nextBeat(){
-		this.queue[0].doNextMove(this);
-
-		this.nextBeat();
-	}
-
-	return Battle;
-
-	// private functions
-	function randomizeQueue(queue){
-		queue.forEach(function(element){
-			element.state.cooldown = Math.floor(Math.random() * 100);
-		});
-	}
-
-	
-
-})();
-
-},{"./creatures/fighter":2,"./creatures/monsters/slime":3,"./creatures/pilots/aiPacifist":4,"./creatures/pilots/playerControl":5,"./creatures/players/warrior":6,"./system/util":11}],9:[function(require,module,exports){
+},{"./battle":1,"./io":9,"./system/screenSize":10,"jquery":12}],9:[function(require,module,exports){
 
 var $ = require("jquery");
 
@@ -444,7 +449,7 @@ module.exports = function resizeGameScreen(){
 	}
 };
 
-},{"../config":1,"jquery":12}],11:[function(require,module,exports){
+},{"../config":2,"jquery":12}],11:[function(require,module,exports){
 //var $ = require("jquery");
 var Config = require("../config");
 module.exports = (function (){
@@ -486,7 +491,7 @@ module.exports = (function (){
 	return Util;
 })();
 
-},{"../config":1}],12:[function(require,module,exports){
+},{"../config":2}],12:[function(require,module,exports){
 /*!
  * jQuery JavaScript Library v2.1.1
  * http://jquery.com/
@@ -9678,4 +9683,4 @@ return jQuery;
 
 }));
 
-},{}]},{},[7])
+},{}]},{},[8])
