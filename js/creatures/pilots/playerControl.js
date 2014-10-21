@@ -51,7 +51,7 @@ module.exports = (function (){
 			default:
 			}
 			if(!resolved){
-				_this.nextMove.call(_this);
+				_this.nextMove.call(_this,gameState,finishedCallback);
 			}else{
 				finishedCallback();
 			}

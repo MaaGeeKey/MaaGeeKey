@@ -13,7 +13,7 @@ module.exports = (function (){
 	 * @return {[type]}           [description]
 	 */
 	p.nextMove = function nextMove(gameState,finishedCallback){
-		this.io.line(this.fighter.base.name+"does nothing.");
+		this.io.line(this.fighter.base.name+" does nothing.");
 		this.fighter.state.cooldown+=this.fighter.base.attackSpeed;
 		finishedCallback();
 	};

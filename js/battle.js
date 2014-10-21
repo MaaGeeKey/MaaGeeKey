@@ -46,7 +46,7 @@ module.exports = (function() {
 			_this.nextBeatFinish.call(_this);
 		});
 		//this.nextBeat();
-	}
+	};
 	p.nextBeatFinish = function nextBeatFinish(){
 		var _this = this;
 		this.queue.sort(Fighter.sortByCooldown);
@@ -55,8 +55,8 @@ module.exports = (function() {
 			str+=this.queue[i].state.cooldown + " ";
 		}
 		console.log(str);
-		setTimeout(function(){_this.nextBeatStart().call(_this);},500);
-	}
+		setTimeout(function(){_this.nextBeatStart.call(_this);},500);
+	};
 
 
 	return Battle;

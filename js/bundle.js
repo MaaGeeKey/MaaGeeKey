@@ -47,7 +47,7 @@ module.exports = (function() {
 			_this.nextBeatFinish.call(_this);
 		});
 		//this.nextBeat();
-	}
+	};
 	p.nextBeatFinish = function nextBeatFinish(){
 		var _this = this;
 		this.queue.sort(Fighter.sortByCooldown);
@@ -56,8 +56,8 @@ module.exports = (function() {
 			str+=this.queue[i].state.cooldown + " ";
 		}
 		console.log(str);
-		setTimeout(function(){_this.nextBeatStart().call(_this);},500);
-	}
+		setTimeout(function(){_this.nextBeatStart.call(_this);},500);
+	};
 
 
 	return Battle;
@@ -147,7 +147,7 @@ module.exports = (function(){
 	p.describe = function describe(){
 		var str = this.getName();
 		str+=" is "+ this.getDescription();
-		str+="\nIt looks "+ this.getHPDescriptor();
+		str+="\nIt looks "+ this.getHPDescriptor()+".";
 		return str;
 	};
 	p.getAttackLine = function getAttackLine(){
@@ -212,8 +212,12 @@ module.exports = (function(){
 		lines:{
 			hp:[
 				"dying",
+				"heavily injured",
 				"injured",
+				"badly hurt",
 				"hurt",
+				"quite hurt",
+				"not so healthy",
 				"healthy"
 			],
 			attack:[
@@ -240,7 +244,7 @@ module.exports = (function (){
 	 * @return {[type]}           [description]
 	 */
 	p.nextMove = function nextMove(gameState,finishedCallback){
-		this.io.line(this.fighter.base.name+"does nothing.");
+		this.io.line(this.fighter.base.name+" does nothing.");
 		this.fighter.state.cooldown+=this.fighter.base.attackSpeed;
 		finishedCallback();
 	};
@@ -303,7 +307,7 @@ module.exports = (function (){
 			default:
 			}
 			if(!resolved){
-				_this.nextMove.call(_this);
+				_this.nextMove.call(_this,gameState,finishedCallback);
 			}else{
 				finishedCallback();
 			}
@@ -315,7 +319,7 @@ module.exports = (function (){
 })();
 
 },{"../../battle":1}],7:[function(require,module,exports){
-// include
+	// include
 
 // main
 module.exports = (function(){
@@ -333,8 +337,12 @@ module.exports = (function(){
 		lines:{
 			hp:[
 				"dying",
+				"heavily injured",
 				"injured",
+				"badly hurt",
 				"hurt",
+				"quite hurt",
+				"not so healthy",
 				"healthy"
 			],
 			attack:[

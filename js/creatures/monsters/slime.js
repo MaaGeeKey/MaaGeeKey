@@ -16,8 +16,12 @@ module.exports = (function(){
 		lines:{
 			hp:[
 				"dying",
+				"heavily injured",
 				"injured",
+				"badly hurt",
 				"hurt",
+				"quite hurt",
+				"not so healthy",
 				"healthy"
 			],
 			attack:[

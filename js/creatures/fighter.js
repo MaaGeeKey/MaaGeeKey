@@ -54,7 +54,7 @@ module.exports = (function(){
 	p.describe = function describe(){
 		var str = this.getName();
 		str+=" is "+ this.getDescription();
-		str+="\nIt looks "+ this.getHPDescriptor();
+		str+="\nIt looks "+ this.getHPDescriptor()+".";
 		return str;
 	};
 	p.getAttackLine = function getAttackLine(){
