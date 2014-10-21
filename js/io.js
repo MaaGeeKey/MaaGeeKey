@@ -55,11 +55,8 @@ module.exports = function(input_div,output_div) {
 		this.inputDiv.appendChild(div);
 
 		function buttonClickCallback(){
-			var resolved = inputResolveFunction.call(this,this.actionLabel);
-			if(resolved){
-				_this.inputDiv.removeChild(div);
-				finishedCallback.call(this);
-			}
+			inputResolveFunction.call(this,this.actionLabel);
+			_this.inputDiv.removeChild(div);
 		}
 
 	};

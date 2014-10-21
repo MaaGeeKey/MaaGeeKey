@@ -15,13 +15,12 @@ module.exports = (function (){
 	 * @param  {Battle} gameState [description]
 	 * @return {[type]}           [description]
 	 */
-	p.nextMove = function nextMove(gameState){
+	p.nextMove = function nextMove(gameState,finishedCallback){
 		var _this = this;
 		this.io.ask(
 			"What would you like to do?",
 			["Inspect","Attack","Guard","Evade","Skills","Use item"],
-			nextBeatCallback,
-			function(){finishedCallback.call(caller);}
+			function(cmd){nextBeatCallback.call(_this,cmd)}
 		);
 		function nextBeatCallback(cmd){
 			var resolved = false;
@@ -32,6 +31,8 @@ module.exports = (function (){
 				break;
 			case "Attack":
 				var msg = this.fighter.attack(gameState.enemies[0]);
+				//console.log(this.fighter.state.cooldown);
+				this.fighter.state.cooldown+=this.fighter.base.attackSpeed;
 				_this.io.line(msg);
 				resolved = true;
 				break;
@@ -49,7 +50,11 @@ module.exports = (function (){
 				break;
 			default:
 			}
-			return resolved;
+			if(!resolved){
+				_this.nextMove.call(_this);
+			}else{
+				finishedCallback();
+			}
 		}
 	};
 

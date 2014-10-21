@@ -37,14 +37,28 @@ module.exports = (function() {
 		));
 		this.queue.sort(Fighter.sortByCooldown);
 		console.log(this.queue);
-		this.nextBeat();
+		this.nextBeatStart();
 	};
 
-	p.nextBeat = function nextBeat(){
-		this.queue[0].doNextMove(this);
-
-		this.nextBeat();
+	p.nextBeatStart = function nextBeatStart(){
+		var _this = this;
+		console.log(this.queue[0]);
+		this.queue[0].doNextMove(this,function(){
+			_this.nextBeatFinish.call(_this);
+		});
+		//this.nextBeat();
 	}
+	p.nextBeatFinish = function nextBeatFinish(){
+		var _this = this;
+		this.queue.sort(Fighter.sortByCooldown);
+		var str = "";
+		for(var i=0; i < this.queue.length; i++){
+			str+=this.queue[i].state.cooldown + " ";
+		}
+		console.log(str);
+		setTimeout(function(){_this.nextBeatStart().call(_this);},500);
+	}
+
 
 	return Battle;
 
@@ -140,9 +154,9 @@ module.exports = (function(){
 		var i = Math.floor(Math.random() * this.base.lines.attack.length);
 		return this.base.lines.attack[i];
 	};
-	p.nextMove = function doNextMove(game){
+	p.doNextMove = function doNextMove(game,finishedCallback){
 		// do not modify the game state
-		this.pilot.nextMove(game);
+		this.pilot.nextMove(game,finishedCallback);
 	};
 	p.attack = function attack(target){
 		// basic attack
@@ -225,9 +239,10 @@ module.exports = (function (){
 	 * @param  {Battle} gameState [description]
 	 * @return {[type]}           [description]
 	 */
-	p.nextMove = function nextMove(gameState){
+	p.nextMove = function nextMove(gameState,finishedCallback){
 		this.io.line(this.fighter.base.name+"does nothing.");
-		finishedCallback.call();
+		this.fighter.state.cooldown+=this.fighter.base.attackSpeed;
+		finishedCallback();
 	};
 
 
@@ -252,13 +267,12 @@ module.exports = (function (){
 	 * @param  {Battle} gameState [description]
 	 * @return {[type]}           [description]
 	 */
-	p.nextMove = function nextMove(gameState){
+	p.nextMove = function nextMove(gameState,finishedCallback){
 		var _this = this;
 		this.io.ask(
 			"What would you like to do?",
 			["Inspect","Attack","Guard","Evade","Skills","Use item"],
-			nextBeatCallback,
-			function(){finishedCallback.call(caller);}
+			function(cmd){nextBeatCallback.call(_this,cmd)}
 		);
 		function nextBeatCallback(cmd){
 			var resolved = false;
@@ -269,6 +283,8 @@ module.exports = (function (){
 				break;
 			case "Attack":
 				var msg = this.fighter.attack(gameState.enemies[0]);
+				//console.log(this.fighter.state.cooldown);
+				this.fighter.state.cooldown+=this.fighter.base.attackSpeed;
 				_this.io.line(msg);
 				resolved = true;
 				break;
@@ -286,7 +302,11 @@ module.exports = (function (){
 				break;
 			default:
 			}
-			return resolved;
+			if(!resolved){
+				_this.nextMove.call(_this);
+			}else{
+				finishedCallback();
+			}
 		}
 	};
 
@@ -412,11 +432,8 @@ module.exports = function(input_div,output_div) {
 		this.inputDiv.appendChild(div);
 
 		function buttonClickCallback(){
-			var resolved = inputResolveFunction.call(this,this.actionLabel);
-			if(resolved){
-				_this.inputDiv.removeChild(div);
-				finishedCallback.call(this);
-			}
+			inputResolveFunction.call(this,this.actionLabel);
+			_this.inputDiv.removeChild(div);
 		}
 
 	};

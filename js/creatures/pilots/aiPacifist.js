@@ -12,9 +12,10 @@ module.exports = (function (){
 	 * @param  {Battle} gameState [description]
 	 * @return {[type]}           [description]
 	 */
-	p.nextMove = function nextMove(gameState){
+	p.nextMove = function nextMove(gameState,finishedCallback){
 		this.io.line(this.fighter.base.name+"does nothing.");
-		finishedCallback.call();
+		this.fighter.state.cooldown+=this.fighter.base.attackSpeed;
+		finishedCallback();
 	};
 
 

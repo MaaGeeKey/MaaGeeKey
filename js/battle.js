@@ -36,14 +36,28 @@ module.exports = (function() {
 		));
 		this.queue.sort(Fighter.sortByCooldown);
 		console.log(this.queue);
-		this.nextBeat();
+		this.nextBeatStart();
 	};
 
-	p.nextBeat = function nextBeat(){
-		this.queue[0].doNextMove(this);
-
-		this.nextBeat();
+	p.nextBeatStart = function nextBeatStart(){
+		var _this = this;
+		console.log(this.queue[0]);
+		this.queue[0].doNextMove(this,function(){
+			_this.nextBeatFinish.call(_this);
+		});
+		//this.nextBeat();
 	}
+	p.nextBeatFinish = function nextBeatFinish(){
+		var _this = this;
+		this.queue.sort(Fighter.sortByCooldown);
+		var str = "";
+		for(var i=0; i < this.queue.length; i++){
+			str+=this.queue[i].state.cooldown + " ";
+		}
+		console.log(str);
+		setTimeout(function(){_this.nextBeatStart().call(_this);},500);
+	}
+
 
 	return Battle;
 
