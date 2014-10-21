@@ -61,8 +61,9 @@ module.exports = (function(){
 		var i = Math.floor(Math.random() * this.base.lines.attack.length);
 		return this.base.lines.attack[i];
 	};
-	p.nextMove = function getNextMove(game){
-		this.pilot.nextMove(game); // TODO
+	p.nextMove = function doNextMove(game){
+		// do not modify the game state
+		this.pilot.nextMove(game);
 	};
 	p.attack = function attack(target){
 		// basic attack

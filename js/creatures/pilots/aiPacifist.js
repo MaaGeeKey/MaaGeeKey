@@ -7,7 +7,7 @@ module.exports = (function (){
 	}
 	var p = AIPacifist.prototype;
 
-	p.nextMove = function nextMove(finishedCallback){
+	p.nextMove = function nextMove(gameState){
 		this.io.line(this.fighter.base.name+"does nothing.");
 		finishedCallback.call();
 	};

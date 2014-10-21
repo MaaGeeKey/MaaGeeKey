@@ -8,7 +8,7 @@ module.exports = (function() {
 			screenRatio:9/16
 		},
 		battle:{
-			defaultAttackModifierMin:0.3,
+			defaultAttackModifierMin:0.5,
 			defaultAttackModifierMax:1.2
 		}
 	};

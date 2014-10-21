@@ -1,5 +1,8 @@
 //var $ = require("jquery");
 //var Config = require("../config");
+
+var Battle = require("../../game");
+
 module.exports = (function (){
 	function PlayerControl(io){
 		this.fighter = null;
@@ -7,7 +10,12 @@ module.exports = (function (){
 	}
 	var p = PlayerControl.prototype;
 
-	p.nextMove = function nextMove(caller,finishedCallback){
+	/**
+	 * perform the next move either by AI or by player
+	 * @param  {Battle} gameState [description]
+	 * @return {[type]}           [description]
+	 */
+	p.nextMove = function nextMove(gameState){
 		var _this = this;
 		this.io.ask(
 			"What would you like to do?",
@@ -19,11 +27,11 @@ module.exports = (function (){
 			var resolved = false;
 			switch(cmd){
 			case "Inspect":
-				_this.io.line(_this.enemies[0].describe());
+				_this.io.line(gameState.enemies[0].describe());
 				resolved = true;
 				break;
 			case "Attack":
-				var msg = this.fighter.attack(_this.enemies[0]);
+				var msg = this.fighter.attack(gameState.enemies[0]);
 				_this.io.line(msg);
 				resolved = true;
 				break;

@@ -9,7 +9,7 @@ module.exports = (function() {
 			screenRatio:9/16
 		},
 		battle:{
-			defaultAttackModifierMin:0.3,
+			defaultAttackModifierMin:0.5,
 			defaultAttackModifierMax:1.2
 		}
 	};
@@ -79,9 +79,9 @@ module.exports = (function(){
 		var i = Math.floor(Math.random() * this.base.lines.attack.length);
 		return this.base.lines.attack[i];
 	};
-	p.nextMove = function getNextMove(game){
-		//this.pilot.nextMove(game); // TODO
-		//
+	p.nextMove = function doNextMove(game){
+		// do not modify the game state
+		this.pilot.nextMove(game);
 	};
 	p.attack = function attack(target){
 		// basic attack
@@ -159,7 +159,7 @@ module.exports = (function (){
 	}
 	var p = AIPacifist.prototype;
 
-	p.nextMove = function nextMove(finishedCallback){
+	p.nextMove = function nextMove(gameState){
 		this.io.line(this.fighter.base.name+"does nothing.");
 		finishedCallback.call();
 	};
@@ -171,6 +171,9 @@ module.exports = (function (){
 },{}],5:[function(require,module,exports){
 //var $ = require("jquery");
 //var Config = require("../config");
+
+var Battle = require()
+
 module.exports = (function (){
 	function PlayerControl(io){
 		this.fighter = null;
@@ -178,7 +181,12 @@ module.exports = (function (){
 	}
 	var p = PlayerControl.prototype;
 
-	p.nextMove = function nextMove(caller,finishedCallback){
+	/**
+	 * perform the next move either by AI or by player
+	 * @param  {Battle} gameState [description]
+	 * @return {[type]}           [description]
+	 */
+	p.nextMove = function nextMove(gameState){
 		var _this = this;
 		this.io.ask(
 			"What would you like to do?",
@@ -190,11 +198,11 @@ module.exports = (function (){
 			var resolved = false;
 			switch(cmd){
 			case "Inspect":
-				_this.io.line(_this.enemies[0].describe());
+				_this.io.line(gameState.enemies[0].describe());
 				resolved = true;
 				break;
 			case "Attack":
-				var msg = this.fighter.attack(_this.enemies[0]);
+				var msg = this.fighter.attack(gameState.enemies[0]);
 				_this.io.line(msg);
 				resolved = true;
 				break;
@@ -253,51 +261,60 @@ module.exports = (function(){
 })();
 
 },{}],7:[function(require,module,exports){
-var ss = require("./system/screenSize");
+// includes
 var $ = require("jquery");
-var Game = require("./game");
+var Battle = require("./game");
 var IOController = require("./io");
+var screenResizeHandler = require("./system/screenSize");
 
+// entry point of the program
+// done on document load
 $(function() {
 	// bind windows resize to screenSize.js
-	$(window).resize(ss);
+	$(window).resize(screenResizeHandler);
 	// initial run
-	ss();
+	screenResizeHandler();
 
+	// retrieve the dom elements
 	var output_div=$("#story").get()[0];
 	var input_div=$("#action").get()[0];
 
-	var io = IOController(input_div,output_div);
+	var ioController = IOController(input_div,output_div);
 
-	var game = Game(io);
-	window.gm = game;
-	game.start(); 
+	// create a clean battler object
+	var battle = new Battle(ioController);
+	// expose the battle object to debug
+	window.gm = battle;
+	battle.start(); 
 
 });
 },{"./game":8,"./io":9,"./system/screenSize":10,"jquery":12}],8:[function(require,module,exports){
-
+// includes
 //var $ = require("jquery");
 var Util = require("./system/util");
+
+// creature that participate in the fight
 var Fighter = require("./creatures/fighter");
 var warrior = require("./creatures/players/warrior");
 var slime = require("./creatures/monsters/slime");
+// pilots
 var PlayerController = require("./creatures/pilots/playerControl");
 var AIPacifist = require("./creatures/pilots/aiPacifist");
 
+// body
 module.exports = (function() {
 
-	return function createNewBattle(IO){
-		var battle = {};
-		battle.io = IO;
-		battle.start = start;
-		battle.nextBeat = nextBeat;
-		battle.players = [];
-		battle.enemies=[];
-		battle.queue = [];
-		return battle;
-	};
+	function Battle(ioController){
+		this.io = ioController;
+		this.players = [];
+		this.enemies = [];
+		this.queue = [];
+	}
 
-	function start(){
+	var p = Battle.prototype;
+
+	// public methods
+	p.start = function start(){
 		this.players.push(new Fighter(warrior,new PlayerController(this.io)));
 		this.enemies.push(new Fighter(slime,new AIPacifist(this.io)));
 		this.queue = this.queue.concat(this.players).concat(this.enemies);
@@ -311,14 +328,17 @@ module.exports = (function() {
 		this.queue.sort(Fighter.sortByCooldown);
 		console.log(this.queue);
 		this.nextBeat();
-	}
+	};
 
-	function nextBeat(){
-		this.queue[0].getNextMove(this);
+	p.nextBeat = function nextBeat(){
+		this.queue[0].doNextMove(this);
 
 		this.nextBeat();
 	}
 
+	return Battle;
+
+	// private functions
 	function randomizeQueue(queue){
 		queue.forEach(function(element){
 			element.state.cooldown = Math.floor(Math.random() * 100);
