@@ -1,7 +1,7 @@
 //var $ = require("jquery");
 //var Config = require("../config");
 
-var Battle = require("../../game");
+var Battle = require("../../battle");
 
 module.exports = (function (){
 	function PlayerControl(io){

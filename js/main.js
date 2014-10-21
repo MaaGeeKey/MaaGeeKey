@@ -1,6 +1,6 @@
 // includes
 var $ = require("jquery");
-var Battle = require("./game");
+var Battle = require("./battle");
 var IOController = require("./io");
 var screenResizeHandler = require("./system/screenSize");
 
