@@ -22,15 +22,19 @@ body{
 	background-color: #CDD;
 }
 #story{
-	background-color: #AEA;
+	background-color: #FF9;
 	height:60%;
-	padding:8px;
 	overflow:auto;
 }
 #story .line{
-	margin:8px 0;
+	margin:12px 8px;
+	opacity:0;
+}
+#story .whisper{
+	color:#996;
+	font-style:italic;
 }
 #action{
-	background-color: #EAA;
+	background-color: #AEA;
 	height:40%;
 }

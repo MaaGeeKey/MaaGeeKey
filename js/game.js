@@ -1,10 +1,11 @@
 
 //var $ = require("jquery");
 var Util = require("./system/util");
-var Fighter = require("./actors/fighter");
-var warrior = require("./actors/players/warrior");
-var slime = require("./actors/monsters/slime");
-var AIPacifist = require("./actors/pilots/aiPacifist");
+var Fighter = require("./creatures/fighter");
+var warrior = require("./creatures/players/warrior");
+var slime = require("./creatures/monsters/slime");
+var PlayerController = require("./creatures/pilots/playerControl");
+var AIPacifist = require("./creatures/pilots/aiPacifist");
 
 module.exports = (function() {
 
@@ -15,58 +16,36 @@ module.exports = (function() {
 		battle.nextBeat = nextBeat;
 		battle.players = [];
 		battle.enemies=[];
+		battle.queue = [];
 		return battle;
 	};
 
 	function start(){
-		this.players.push(new Fighter(warrior,new AIPacifist(this.io)));
+		this.players.push(new Fighter(warrior,new PlayerController(this.io)));
 		this.enemies.push(new Fighter(slime,new AIPacifist(this.io)));
-		this.players.concat(this.enemies).forEach(function(element){
-			element.state.cooldown=0;
-		});
+		this.queue = this.queue.concat(this.players).concat(this.enemies);
+		console.log(this.queue);
+		randomizeQueue(this.queue);
 		//this.io.line("A wild "+this.enemies[0].getName()+" challenges you!");
 		this.io.line(Util.stringReplace(
 			"A wild {1} challenges you!",
 			this.enemies[0].getName()
 		));
+		this.queue.sort(Fighter.sortByCooldown);
+		console.log(this.queue);
 		this.nextBeat();
 	}
 
 	function nextBeat(){
-		var _this = this;
-		this.io.ask(
-			"What would you like to do?",
-			["Inspect","Attack","Guard","Evade","Skills","Use item"],
-			function nextBeatCallback(cmd){
-				var resolved = false;
-				switch(cmd){
-					case "Inspect":
-					_this.io.line(_this.enemies[0].describe());
-					resolved = true;
-					break;
-					case "Attack":
-					var msg = _this.players[0].attack(_this.enemies[0]);
-					_this.io.line(msg);
-					resolved = true;
-					break;
-					case "Guard":
-					_this.io.line("Cannot guard at the moment. Please choose another action.");
-					break;
-					case "Evade":
-					_this.io.line("Cannot evade at the moment. Please choose another action.");
-					break;
-					case "Skills":
-					_this.io.line("Skill system not ready. Please choose another action.");
-					break;
-					case "Use item":
-					_this.io.line("Item system not ready. Please choose another action.");
-					break;
-					default:
-				}
-				return resolved;
-			}
-		);
+		this.queue[0].getNextMove(this);
 
+		this.nextBeat();
+	}
+
+	function randomizeQueue(queue){
+		queue.forEach(function(element){
+			element.state.cooldown = Math.floor(Math.random() * 100);
+		});
 	}
 
 	

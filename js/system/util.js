@@ -24,7 +24,6 @@ module.exports = (function (){
 	 */
 	Util.stringReplace = function stringReplace(){
 		var args = arguments;
-		console.log(args);
 		return args[0].replace(/{(\d+)}/g, function(match, number) {
 			return typeof args[number] != 'undefined'?args[number]:match;
 		});

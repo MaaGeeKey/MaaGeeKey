@@ -7,11 +7,9 @@ module.exports = (function (){
 	}
 	var p = AIPacifist.prototype;
 
-	p.nextMove = function nextMove(){
-		var resolved = false;
+	p.nextMove = function nextMove(finishedCallback){
 		this.io.line(this.fighter.base.name+"does nothing.");
-		resolved = true;
-		return resolved;
+		finishedCallback.call();
 	};
 
 

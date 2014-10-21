@@ -1,4 +1,21 @@
 (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);throw new Error("Cannot find module '"+o+"'")}var f=n[o]={exports:{}};t[o][0].call(f.exports,function(e){var n=t[o][1][e];return s(n?n:e)},f,f.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
+
+//var $ = require("jquery");
+
+module.exports = (function() {
+
+	return {
+		system:{
+			screenRatio:9/16
+		},
+		battle:{
+			defaultAttackModifierMin:0.3,
+			defaultAttackModifierMax:1.2
+		}
+	};
+
+})();
+},{}],2:[function(require,module,exports){
 // include
 var Util = require("../system/util");
 
@@ -21,7 +38,13 @@ module.exports = (function(){
 		this.pilot.fighter = this;
 	}
 
-	// public vaariable
+	// static functions and variables
+	Fighter.sortByCooldown = function sortByCooldown(a,b){
+		// returns positive if b comes before a
+		return a.state.cooldown - b.state.cooldown;
+	};
+
+	// public variable
 	var p = Fighter.prototype;
 	p.getHP = function getHP(){
 		return this.state.hp;
@@ -56,7 +79,12 @@ module.exports = (function(){
 		var i = Math.floor(Math.random() * this.base.lines.attack.length);
 		return this.base.lines.attack[i];
 	};
+	p.nextMove = function getNextMove(game){
+		//this.pilot.nextMove(game); // TODO
+		//
+	};
 	p.attack = function attack(target){
+		// basic attack
 		var msg = Util.stringReplace(
 			this.getAttackLine(),
 			"You",
@@ -74,10 +102,10 @@ module.exports = (function(){
 			var attackDamageRatio = damage / target.state.hp;
 			if(attackDamageRatio>=0.5){
 				msg+="dealing a massive blow at it.";
-			}else if (attackDamageRatio>=0.2){
-				msg+="dealing significant damage to it.";
+			}else if (attackDamageRatio>=0.1){
+				msg+="dealing some damage to it.";
 			}else{
-				msg+="and it was not very effective.";
+				msg+="but it was not very effective.";
 			}
 		}
 
@@ -90,7 +118,7 @@ module.exports = (function(){
 
 })();
 
-},{"../system/util":10}],2:[function(require,module,exports){
+},{"../system/util":11}],3:[function(require,module,exports){
 // include
 
 // main
@@ -121,7 +149,7 @@ module.exports = (function(){
 	};
 	return Slime;
 })();
-},{}],3:[function(require,module,exports){
+},{}],4:[function(require,module,exports){
 //var $ = require("jquery");
 //var Config = require("../config");
 module.exports = (function (){
@@ -131,18 +159,68 @@ module.exports = (function (){
 	}
 	var p = AIPacifist.prototype;
 
-	p.nextMove = function nextMove(){
-		var resolved = false;
+	p.nextMove = function nextMove(finishedCallback){
 		this.io.line(this.fighter.base.name+"does nothing.");
-		resolved = true;
-		return resolved;
+		finishedCallback.call();
 	};
 
 
 	return AIPacifist;
 })();
 
-},{}],4:[function(require,module,exports){
+},{}],5:[function(require,module,exports){
+//var $ = require("jquery");
+//var Config = require("../config");
+module.exports = (function (){
+	function PlayerControl(io){
+		this.fighter = null;
+		this.io = io;
+	}
+	var p = PlayerControl.prototype;
+
+	p.nextMove = function nextMove(caller,finishedCallback){
+		var _this = this;
+		this.io.ask(
+			"What would you like to do?",
+			["Inspect","Attack","Guard","Evade","Skills","Use item"],
+			nextBeatCallback,
+			function(){finishedCallback.call(caller);}
+		);
+		function nextBeatCallback(cmd){
+			var resolved = false;
+			switch(cmd){
+			case "Inspect":
+				_this.io.line(_this.enemies[0].describe());
+				resolved = true;
+				break;
+			case "Attack":
+				var msg = this.fighter.attack(_this.enemies[0]);
+				_this.io.line(msg);
+				resolved = true;
+				break;
+			case "Guard":
+				_this.io.whisper("Cannot guard at the moment. Please choose another action.");
+				break;
+			case "Evade":
+				_this.io.whisper("Cannot evade at the moment. Please choose another action.");
+				break;
+			case "Skills":
+				_this.io.whisper("Skill system not ready. Please choose another action.");
+				break;
+			case "Use item":
+				_this.io.whisper("Item system not ready. Please choose another action.");
+				break;
+			default:
+			}
+			return resolved;
+		}
+	};
+
+
+	return PlayerControl;
+})();
+
+},{}],6:[function(require,module,exports){
 // include
 
 // main
@@ -174,24 +252,7 @@ module.exports = (function(){
 	return Warrior;
 })();
 
-},{}],5:[function(require,module,exports){
-
-//var $ = require("jquery");
-
-module.exports = (function() {
-
-	return {
-		system:{
-			screenRatio:9/16
-		},
-		battle:{
-			defaultAttackModifierMin:0.3,
-			defaultAttackModifierMax:1.2
-		}
-	};
-
-})();
-},{}],6:[function(require,module,exports){
+},{}],7:[function(require,module,exports){
 var ss = require("./system/screenSize");
 var $ = require("jquery");
 var Game = require("./game");
@@ -213,14 +274,15 @@ $(function() {
 	game.start(); 
 
 });
-},{"./game":7,"./io":8,"./system/screenSize":9,"jquery":11}],7:[function(require,module,exports){
+},{"./game":8,"./io":9,"./system/screenSize":10,"jquery":12}],8:[function(require,module,exports){
 
 //var $ = require("jquery");
 var Util = require("./system/util");
-var Fighter = require("./actors/fighter");
-var warrior = require("./actors/players/warrior");
-var slime = require("./actors/monsters/slime");
-var AIPacifist = require("./actors/pilots/aiPacifist");
+var Fighter = require("./creatures/fighter");
+var warrior = require("./creatures/players/warrior");
+var slime = require("./creatures/monsters/slime");
+var PlayerController = require("./creatures/pilots/playerControl");
+var AIPacifist = require("./creatures/pilots/aiPacifist");
 
 module.exports = (function() {
 
@@ -231,69 +293,47 @@ module.exports = (function() {
 		battle.nextBeat = nextBeat;
 		battle.players = [];
 		battle.enemies=[];
+		battle.queue = [];
 		return battle;
 	};
 
 	function start(){
-		this.players.push(new Fighter(warrior,new AIPacifist(this.io)));
+		this.players.push(new Fighter(warrior,new PlayerController(this.io)));
 		this.enemies.push(new Fighter(slime,new AIPacifist(this.io)));
-		this.players.concat(this.enemies).forEach(function(element){
-			element.state.cooldown=0;
-		});
+		this.queue = this.queue.concat(this.players).concat(this.enemies);
+		console.log(this.queue);
+		randomizeQueue(this.queue);
 		//this.io.line("A wild "+this.enemies[0].getName()+" challenges you!");
 		this.io.line(Util.stringReplace(
 			"A wild {1} challenges you!",
 			this.enemies[0].getName()
 		));
+		this.queue.sort(Fighter.sortByCooldown);
+		console.log(this.queue);
 		this.nextBeat();
 	}
 
 	function nextBeat(){
-		var _this = this;
-		this.io.ask(
-			"What would you like to do?",
-			["Inspect","Attack","Guard","Evade","Skills","Use item"],
-			function nextBeatCallback(cmd){
-				var resolved = false;
-				switch(cmd){
-					case "Inspect":
-					_this.io.line(_this.enemies[0].describe());
-					resolved = true;
-					break;
-					case "Attack":
-					var msg = _this.players[0].attack(_this.enemies[0]);
-					_this.io.line(msg);
-					resolved = true;
-					break;
-					case "Guard":
-					_this.io.line("Cannot guard at the moment. Please choose another action.");
-					break;
-					case "Evade":
-					_this.io.line("Cannot evade at the moment. Please choose another action.");
-					break;
-					case "Skills":
-					_this.io.line("Skill system not ready. Please choose another action.");
-					break;
-					case "Use item":
-					_this.io.line("Item system not ready. Please choose another action.");
-					break;
-					default:
-				}
-				return resolved;
-			}
-		);
+		this.queue[0].getNextMove(this);
 
+		this.nextBeat();
+	}
+
+	function randomizeQueue(queue){
+		queue.forEach(function(element){
+			element.state.cooldown = Math.floor(Math.random() * 100);
+		});
 	}
 
 	
 
 })();
 
-},{"./actors/fighter":1,"./actors/monsters/slime":2,"./actors/pilots/aiPacifist":3,"./actors/players/warrior":4,"./system/util":10}],8:[function(require,module,exports){
+},{"./creatures/fighter":2,"./creatures/monsters/slime":3,"./creatures/pilots/aiPacifist":4,"./creatures/pilots/playerControl":5,"./creatures/players/warrior":6,"./system/util":11}],9:[function(require,module,exports){
 
 var $ = require("jquery");
 
-module.exports = (function(input_div,output_div) {
+module.exports = function(input_div,output_div) {
 
 	var IOController = {};
 	IOController. inputDiv =  input_div;
@@ -306,6 +346,16 @@ module.exports = (function(input_div,output_div) {
 
 		this.outputDiv.appendChild(p);
 		this.outputDiv.scrollTop = this.outputDiv.scrollHeight;
+		$(p).animate({opacity: 1},500);
+	};
+	IOController.whisper = function whisper(){
+		var p = document.createElement("p");
+		p.className=" line whisper ";
+		p.appendChild(document.createTextNode(arguments[0]));
+
+		this.outputDiv.appendChild(p);
+		this.outputDiv.scrollTop = this.outputDiv.scrollHeight;
+		$(p).animate({opacity: 1},500);
 	};
 
 	/**
@@ -315,7 +365,7 @@ module.exports = (function(input_div,output_div) {
 	 * @param  {array}  choices  array of choices, and their callbacks
 	 * @return {bool}            success or not
 	 */
-	IOController.ask = function ask(question,choices,callback){
+	IOController.ask = function ask(question,choices,inputResolveFunction,finishedCallback){
 		var _this = this;
 		// create a <p> with the question
 		var div = document.createElement("div");
@@ -337,20 +387,22 @@ module.exports = (function(input_div,output_div) {
 		this.inputDiv.appendChild(div);
 
 		function buttonClickCallback(){
-			var resolved = callback(this.actionLabel);
+			var resolved = inputResolveFunction.call(this,this.actionLabel);
 			if(resolved){
 				_this.inputDiv.removeChild(div);
+				finishedCallback.call(this);
 			}
 		}
 
 	};
+	
 
 
 	return IOController;
 
-});
+};
 
-},{"jquery":11}],9:[function(require,module,exports){
+},{"jquery":12}],10:[function(require,module,exports){
 var $ = require("jquery");
 var config = require("../config");
 
@@ -372,7 +424,7 @@ module.exports = function resizeGameScreen(){
 	}
 };
 
-},{"../config":5,"jquery":11}],10:[function(require,module,exports){
+},{"../config":1,"jquery":12}],11:[function(require,module,exports){
 //var $ = require("jquery");
 var Config = require("../config");
 module.exports = (function (){
@@ -399,7 +451,6 @@ module.exports = (function (){
 	 */
 	Util.stringReplace = function stringReplace(){
 		var args = arguments;
-		console.log(args);
 		return args[0].replace(/{(\d+)}/g, function(match, number) {
 			return typeof args[number] != 'undefined'?args[number]:match;
 		});
@@ -415,7 +466,7 @@ module.exports = (function (){
 	return Util;
 })();
 
-},{"../config":5}],11:[function(require,module,exports){
+},{"../config":1}],12:[function(require,module,exports){
 /*!
  * jQuery JavaScript Library v2.1.1
  * http://jquery.com/
@@ -9607,4 +9658,4 @@ return jQuery;
 
 }));
 
-},{}]},{},[6])
+},{}]},{},[7])

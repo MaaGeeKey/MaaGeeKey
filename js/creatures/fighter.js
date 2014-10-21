@@ -20,7 +20,13 @@ module.exports = (function(){
 		this.pilot.fighter = this;
 	}
 
-	// public vaariable
+	// static functions and variables
+	Fighter.sortByCooldown = function sortByCooldown(a,b){
+		// returns positive if b comes before a
+		return a.state.cooldown - b.state.cooldown;
+	};
+
+	// public variable
 	var p = Fighter.prototype;
 	p.getHP = function getHP(){
 		return this.state.hp;
@@ -55,7 +61,11 @@ module.exports = (function(){
 		var i = Math.floor(Math.random() * this.base.lines.attack.length);
 		return this.base.lines.attack[i];
 	};
+	p.nextMove = function getNextMove(game){
+		this.pilot.nextMove(game); // TODO
+	};
 	p.attack = function attack(target){
+		// basic attack
 		var msg = Util.stringReplace(
 			this.getAttackLine(),
 			"You",
@@ -73,10 +83,10 @@ module.exports = (function(){
 			var attackDamageRatio = damage / target.state.hp;
 			if(attackDamageRatio>=0.5){
 				msg+="dealing a massive blow at it.";
-			}else if (attackDamageRatio>=0.2){
-				msg+="dealing significant damage to it.";
+			}else if (attackDamageRatio>=0.1){
+				msg+="dealing some damage to it.";
 			}else{
-				msg+="and it was not very effective.";
+				msg+="but it was not very effective.";
 			}
 		}
 
