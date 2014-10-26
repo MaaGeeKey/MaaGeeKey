@@ -2,6 +2,7 @@
 var $ = require("jquery");
 var Battle = require("./battle");
 var IOController = require("./io");
+var AudioController = require("./audioController");
 var screenResizeHandler = require("./system/screenSize");
 
 // entry point of the program
@@ -16,7 +17,7 @@ $(function() {
 	var output_div=$("#story").get()[0];
 	var input_div=$("#action").get()[0];
 
-	var ioController = IOController(input_div,output_div);
+	var ioController = IOController(input_div,output_div,new AudioController());
 
 	// create a clean battler object
 	var battle = new Battle(ioController);

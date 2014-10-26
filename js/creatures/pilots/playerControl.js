@@ -20,7 +20,7 @@ module.exports = (function (){
 		this.io.ask(
 			"What would you like to do?",
 			["Inspect","Attack","Guard","Evade","Skills","Use item"],
-			function(cmd){nextBeatCallback.call(_this,cmd)}
+			function(cmd){nextBeatCallback.call(_this,cmd);}
 		);
 		function nextBeatCallback(cmd){
 			var resolved = false;

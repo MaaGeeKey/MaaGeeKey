@@ -1,4 +1,64 @@
 (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);throw new Error("Cannot find module '"+o+"'")}var f=n[o]={exports:{}};t[o][0].call(f.exports,function(e){var n=t[o][1][e];return s(n?n:e)},f,f.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
+
+var $ = require("jquery");
+var Queue = require("./util/Queue.src");
+var debug_func_lifecycle = false;
+
+module.exports = (function() {
+
+	function AudioController(){
+		this.queue = new Queue();
+		this.isPlaying = false;
+	}
+	var p = AudioController.prototype;
+
+	p.pushLine = function pushLine(HTML5Audio){
+		this.queue.enqueue(HTML5Audio);
+		if(!this.isPlaying && this.queue.getLength()==1){
+			if(debug_func_lifecycle) console.log("new start");
+
+			this.loopStart();
+		}
+	};
+
+	p.loopStart = function loopStart(){
+		if(debug_func_lifecycle) console.log("Loop start");
+
+		var _this = this;
+		if(!this.queue.isEmpty()){
+			var HTML5Audio = this.queue.peek();
+			if(HTML5Audio.readyState == 4){// HAVE_ENOUGH_DATA
+				if(debug_func_lifecycle) console.log("ready");
+
+				this.queue.dequeue();
+				HTML5Audio.onended = onended;
+				this.isPlaying = true;
+				HTML5Audio.play();
+			}else{
+				if(debug_func_lifecycle) console.log("not ready");
+
+				setTimeout(function(){_this.loopStart.call(_this);},500);
+			}
+		}
+		function onended(){
+			if(debug_func_lifecycle)console.log("ended");
+
+			_this.isPlaying = false;
+			_this.loopEnd.call(_this);
+		}
+	};
+	p.loopEnd = function loopEnd(){
+		var _this = this;
+		if(!this.queue.isEmpty()){
+			setTimeout(function(){_this.loopStart.call(_this);},500);
+		}
+	};
+
+	return AudioController;
+
+})();
+
+},{"./util/Queue.src":13,"jquery":14}],2:[function(require,module,exports){
 // includes
 //var $ = require("jquery");
 var Util = require("./system/util");
@@ -28,7 +88,7 @@ module.exports = (function() {
 		this.players.push(new Fighter(warrior,new PlayerController(this.io)));
 		this.enemies.push(new Fighter(slime,new AIPacifist(this.io)));
 		this.queue = this.queue.concat(this.players).concat(this.enemies);
-		console.log(this.queue);
+		//console.log(this.queue);
 		randomizeQueue(this.queue);
 		//this.io.line("A wild "+this.enemies[0].getName()+" challenges you!");
 		this.io.line(Util.stringReplace(
@@ -42,7 +102,7 @@ module.exports = (function() {
 
 	p.nextBeatStart = function nextBeatStart(){
 		var _this = this;
-		console.log(this.queue[0]);
+		//console.log(this.queue[0]);
 		this.queue[0].doNextMove(this,function(){
 			_this.nextBeatFinish.call(_this);
 		});
@@ -55,7 +115,7 @@ module.exports = (function() {
 		for(var i=0; i < this.queue.length; i++){
 			str+=this.queue[i].state.cooldown + " ";
 		}
-		console.log(str);
+		//console.log(str);
 		setTimeout(function(){_this.nextBeatStart.call(_this);},500);
 	};
 
@@ -73,7 +133,7 @@ module.exports = (function() {
 
 })();
 
-},{"./creatures/fighter":3,"./creatures/monsters/slime":4,"./creatures/pilots/aiPacifist":5,"./creatures/pilots/playerControl":6,"./creatures/players/warrior":7,"./system/util":11}],2:[function(require,module,exports){
+},{"./creatures/fighter":4,"./creatures/monsters/slime":5,"./creatures/pilots/aiPacifist":6,"./creatures/pilots/playerControl":7,"./creatures/players/warrior":8,"./system/util":12}],3:[function(require,module,exports){
 
 //var $ = require("jquery");
 
@@ -90,7 +150,7 @@ module.exports = (function() {
 	};
 
 })();
-},{}],3:[function(require,module,exports){
+},{}],4:[function(require,module,exports){
 // include
 var Util = require("../system/util");
 
@@ -193,7 +253,7 @@ module.exports = (function(){
 
 })();
 
-},{"../system/util":11}],4:[function(require,module,exports){
+},{"../system/util":12}],5:[function(require,module,exports){
 // include
 
 // main
@@ -228,7 +288,7 @@ module.exports = (function(){
 	};
 	return Slime;
 })();
-},{}],5:[function(require,module,exports){
+},{}],6:[function(require,module,exports){
 //var $ = require("jquery");
 //var Config = require("../config");
 module.exports = (function (){
@@ -253,7 +313,7 @@ module.exports = (function (){
 	return AIPacifist;
 })();
 
-},{}],6:[function(require,module,exports){
+},{}],7:[function(require,module,exports){
 //var $ = require("jquery");
 //var Config = require("../config");
 
@@ -276,7 +336,7 @@ module.exports = (function (){
 		this.io.ask(
 			"What would you like to do?",
 			["Inspect","Attack","Guard","Evade","Skills","Use item"],
-			function(cmd){nextBeatCallback.call(_this,cmd)}
+			function(cmd){nextBeatCallback.call(_this,cmd);}
 		);
 		function nextBeatCallback(cmd){
 			var resolved = false;
@@ -318,7 +378,7 @@ module.exports = (function (){
 	return PlayerControl;
 })();
 
-},{"../../battle":1}],7:[function(require,module,exports){
+},{"../../battle":2}],8:[function(require,module,exports){
 	// include
 
 // main
@@ -354,11 +414,12 @@ module.exports = (function(){
 	return Warrior;
 })();
 
-},{}],8:[function(require,module,exports){
+},{}],9:[function(require,module,exports){
 // includes
 var $ = require("jquery");
 var Battle = require("./battle");
 var IOController = require("./io");
+var AudioController = require("./audioController");
 var screenResizeHandler = require("./system/screenSize");
 
 // entry point of the program
@@ -373,7 +434,7 @@ $(function() {
 	var output_div=$("#story").get()[0];
 	var input_div=$("#action").get()[0];
 
-	var ioController = IOController(input_div,output_div);
+	var ioController = IOController(input_div,output_div,new AudioController());
 
 	// create a clean battler object
 	var battle = new Battle(ioController);
@@ -382,15 +443,16 @@ $(function() {
 	battle.start(); 
 
 });
-},{"./battle":1,"./io":9,"./system/screenSize":10,"jquery":12}],9:[function(require,module,exports){
+},{"./audioController":1,"./battle":2,"./io":10,"./system/screenSize":11,"jquery":14}],10:[function(require,module,exports){
 
 var $ = require("jquery");
 
-module.exports = function(input_div,output_div) {
+module.exports = function(input_div,output_div,audioController) {
 
 	var IOController = {};
 	IOController. inputDiv =  input_div;
 	IOController.outputDiv = output_div;
+	IOController.audioController = audioController;
 
 	IOController.line = function line(){
 		var p = document.createElement("p");
@@ -400,6 +462,12 @@ module.exports = function(input_div,output_div) {
 		this.outputDiv.appendChild(p);
 		this.outputDiv.scrollTop = this.outputDiv.scrollHeight;
 		$(p).animate({opacity: 1},500);
+		//console.log(this.audioController);
+		// play audio through controller
+		var audio = new Audio();
+		audio.autoPlay = false;
+		audio.src ='http://translate.google.com/translate_tts?ie=utf-8&tl=en&q='+arguments[0];
+		this.audioController.pushLine(audio);
 	};
 	IOController.whisper = function whisper(){
 		var p = document.createElement("p");
@@ -452,7 +520,7 @@ module.exports = function(input_div,output_div) {
 
 };
 
-},{"jquery":12}],10:[function(require,module,exports){
+},{"jquery":14}],11:[function(require,module,exports){
 var $ = require("jquery");
 var config = require("../config");
 
@@ -474,7 +542,7 @@ module.exports = function resizeGameScreen(){
 	}
 };
 
-},{"../config":2,"jquery":12}],11:[function(require,module,exports){
+},{"../config":3,"jquery":14}],12:[function(require,module,exports){
 //var $ = require("jquery");
 var Config = require("../config");
 module.exports = (function (){
@@ -516,7 +584,79 @@ module.exports = (function (){
 	return Util;
 })();
 
-},{"../config":2}],12:[function(require,module,exports){
+},{"../config":3}],13:[function(require,module,exports){
+/*
+
+Queue.js
+
+A function to represent a queue
+
+Created by Stephen Morley - http://code.stephenmorley.org/ - and released under
+the terms of the CC0 1.0 Universal legal code:
+
+http://creativecommons.org/publicdomain/zero/1.0/legalcode
+
+*/
+
+/* Creates a new queue. A queue is a first-in-first-out (FIFO) data structure -
+ * items are added to the end of the queue and removed from the front.
+ */
+module.exports = function Queue(){
+
+  // initialise the queue and offset
+  var queue  = [];
+  var offset = 0;
+
+  // Returns the length of the queue.
+  this.getLength = function(){
+    return (queue.length - offset);
+  };
+
+  // Returns true if the queue is empty, and false otherwise.
+  this.isEmpty = function(){
+    return (this.getLength() === 0);
+  };
+
+  /* Enqueues the specified item. The parameter is:
+   *
+   * item - the item to enqueue
+   */
+  this.enqueue = function(item){
+    queue.push(item);
+  };
+
+  /* Dequeues an item and returns it. If the queue is empty, the value
+   * 'undefined' is returned.
+   */
+  this.dequeue = function(){
+
+    // if the queue is empty, return immediately
+    if (this.getLength() === 0) return undefined;
+
+    // store the item at the front of the queue
+    var item = queue[offset];
+
+    // increment the offset and remove the free space if necessary
+    if (++ offset * 2 >= this.getLength()){
+      queue  = queue.slice(offset);
+      offset = 0;
+    }
+
+    // return the dequeued item
+    return item;
+
+  };
+
+  /* Returns the item at the front of the queue (without dequeuing it). If the
+   * queue is empty then undefined is returned.
+   */
+  this.peek = function(){
+    return (this.getLength() > 0 ? queue[offset] : undefined);
+  };
+
+};
+
+},{}],14:[function(require,module,exports){
 /*!
  * jQuery JavaScript Library v2.1.1
  * http://jquery.com/
@@ -9708,4 +9848,4 @@ return jQuery;
 
 }));
 
-},{}]},{},[8])
+},{}]},{},[9])

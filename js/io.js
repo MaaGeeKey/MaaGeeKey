@@ -1,11 +1,12 @@
 
 var $ = require("jquery");
 
-module.exports = function(input_div,output_div) {
+module.exports = function(input_div,output_div,audioController) {
 
 	var IOController = {};
 	IOController. inputDiv =  input_div;
 	IOController.outputDiv = output_div;
+	IOController.audioController = audioController;
 
 	IOController.line = function line(){
 		var p = document.createElement("p");
@@ -15,6 +16,12 @@ module.exports = function(input_div,output_div) {
 		this.outputDiv.appendChild(p);
 		this.outputDiv.scrollTop = this.outputDiv.scrollHeight;
 		$(p).animate({opacity: 1},500);
+		//console.log(this.audioController);
+		// play audio through controller
+		var audio = new Audio();
+		audio.autoPlay = false;
+		audio.src ='http://translate.google.com/translate_tts?ie=utf-8&tl=en&q='+arguments[0];
+		this.audioController.pushLine(audio);
 	};
 	IOController.whisper = function whisper(){
 		var p = document.createElement("p");

@@ -27,7 +27,7 @@ module.exports = (function() {
 		this.players.push(new Fighter(warrior,new PlayerController(this.io)));
 		this.enemies.push(new Fighter(slime,new AIPacifist(this.io)));
 		this.queue = this.queue.concat(this.players).concat(this.enemies);
-		console.log(this.queue);
+		//console.log(this.queue);
 		randomizeQueue(this.queue);
 		//this.io.line("A wild "+this.enemies[0].getName()+" challenges you!");
 		this.io.line(Util.stringReplace(
@@ -41,7 +41,7 @@ module.exports = (function() {
 
 	p.nextBeatStart = function nextBeatStart(){
 		var _this = this;
-		console.log(this.queue[0]);
+		//console.log(this.queue[0]);
 		this.queue[0].doNextMove(this,function(){
 			_this.nextBeatFinish.call(_this);
 		});
@@ -54,7 +54,7 @@ module.exports = (function() {
 		for(var i=0; i < this.queue.length; i++){
 			str+=this.queue[i].state.cooldown + " ";
 		}
-		console.log(str);
+		//console.log(str);
 		setTimeout(function(){_this.nextBeatStart.call(_this);},500);
 	};
 
