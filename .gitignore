@@ -226,6 +226,5 @@ node_modules
 
 
 gulp browserify reload.bat
-gulpfile.js
 MaaGeeKey.sublime-project
 MaaGeeKey.sublime-workspace
