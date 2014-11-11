@@ -466,8 +466,8 @@ module.exports = function(input_div,output_div,audioController) {
 		// play audio through controller
 		var audio = new Audio();
 		audio.autoPlay = false;
-		audio.src ='http://translate.google.com/translate_tts?ie=utf-8&tl=en&q='+arguments[0];
 		audio.rel = 'noreferrer';
+		audio.src ='http://translate.google.com/translate_tts?ie=utf-8&tl=en&q='+arguments[0];
 		this.audioController.pushLine(audio);
 	};
 	IOController.whisper = function whisper(){
