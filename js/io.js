@@ -18,11 +18,12 @@ module.exports = function(input_div,output_div,audioController) {
 		$(p).animate({opacity: 1},500);
 		//console.log(this.audioController);
 		// play audio through controller
-		var audio = new Audio();
-		audio.autoPlay = false;
-		audio.rel = 'noreferrer';
-		audio.src ='http://translate.google.com/translate_tts?ie=utf-8&tl=en&tl=en&total=1&idx=0&client=t&prev=input&q='+arguments[0];
-		this.audioController.pushLine(audio);
+		//var audio = new Audio();
+		//audio.autoPlay = false;
+		//audio.rel = 'noreferrer';
+		//audio.src ='http://translate.google.com/translate_tts?ie=utf-8&tl=en&tl=en&total=1&idx=0&client=t&prev=input&q='+arguments[0];
+		//this.audioController.pushLine(audio);
+		this.audioController.pushLine(arguments[0]);
 	};
 	IOController.whisper = function whisper(){
 		var p = document.createElement("p");
