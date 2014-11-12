@@ -122,6 +122,7 @@ module.exports = function() {
 				var sentences = [];
 				that._ended = false;
 				var audio = new Audio();
+				audio.autoplay = true;
 
 				audio.addEventListener('play', function() {
 					updateElapsedTime();
@@ -240,6 +241,7 @@ module.exports = function() {
 
 				audio.addEventListener('play', function() {
 					console.log('SpeechSynthesis audio play');
+
 				}, false);
 
 				audio.addEventListener('ended', function() {
