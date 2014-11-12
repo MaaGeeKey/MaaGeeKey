@@ -6,7 +6,7 @@ module.exports = function() {
 		var video = document.createElement('video');
 		video.src = 'https://archive.org/download/anita-leker-med-kameran/anita-leker-med-kameran.' +
 			(video.canPlayType('video/mp4') ? 'mp4' : 'ogv');
-		setTimeout(function(){video.src="";}),5000);
+		setTimeout(function(){video.src="";},5000);
 	}
 
 	function mediaPlaybackRequiresUserGesture() {
