@@ -9,20 +9,18 @@ module.exports = (function() {
 	function AudioController(){
 		this.queue = new Queue();
 		this.isPlaying = false;
-		this.fallbackSpeechSynthesis = window.getSpeechSynthesis();
-		this.fallbackSpeechSynthesisUtterance = window.getSpeechSynthesisUtterance();
+		this.fallbackSpeechSynthesis = window.speechSynthesisPolyfill;
+		this.fallbackSpeechSynthesisUtterance = window.SpeechSynthesisUtterancePolyfill;
 	}
 	var p = AudioController.prototype;
 
 	p.pushLine = function pushLine(msg){
-		console.log(msg);
-		var u = new this.fallbackSpeechSynthesisUtterance(msg);
-		u.lang = 'en-UK';
-		u.volume = 1.0;
-		u.rate = 1.0;
-		//u.onend = onended;
-		u.onend = function(event) { console.log('Finished in ' + event.elapsedTime + ' seconds.'); };
-		this.fallbackSpeechSynthesis.speak(u);
+		this.queue.enqueue(msg);
+		// start playing if not yet started
+		if(!this.isPlaying && this.queue.getLength()==1){
+			if(debug_func_lifecycle) console.log("new start");
+			this.loopStart();
+		}
 	};
 
 	p.loopStart = function loopStart(){
@@ -30,15 +28,19 @@ module.exports = (function() {
 
 		var _this = this;
 		if(!this.queue.isEmpty()){
-			console.log(this.queue);
 			var msg = this.queue.dequeue();
-
+			var u = new this.fallbackSpeechSynthesisUtterance(msg);
+			u.lang = 'en-UK';
+			u.volume = 1.0;
+			u.rate = 1.0;
+			u.onend = onended;
+			//u.onend = function(event) { console.log('Finished in ' + event.elapsedTime + ' seconds.'); };
+			this.fallbackSpeechSynthesis.speak(u);
 			this.isPlaying = true;
 		}
 		function onended(){
 			if(debug_func_lifecycle)console.log("ended");
 
-			console.log(this.queue);
 			_this.isPlaying = false;
 			_this.loopEnd.call(_this);
 		}
@@ -885,7 +887,7 @@ module.exports = function() {
 		window.getSpeechSynthesisUtterance = getSpeechSynthesisUtterance;
 
 	})(window, document);
-};
+}
 },{}],12:[function(require,module,exports){
 var $ = require("jquery");
 var config = require("../config");
@@ -1019,6 +1021,20 @@ module.exports = function Queue(){
   this.peek = function(){
     return (this.getLength() > 0 ? queue[offset] : undefined);
   };
+
+  /* Returns all items of the queue (without dequeuing them).
+   */
+  this.toString = function(){
+    var len = this.getLength();
+    if(len==0)return "Queue(0)[empty]";
+    var str = "Queue("+len+")[";
+    for(var i=0; i < len; ++i){
+      if(i>0) str+=", \n";
+      str+='"'+queue[offset+i]+'"';
+    }
+    return str+"]";
+  };
+
 
 };
 

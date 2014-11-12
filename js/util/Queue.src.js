@@ -67,4 +67,18 @@ module.exports = function Queue(){
     return (this.getLength() > 0 ? queue[offset] : undefined);
   };
 
+  /* Returns all items of the queue (without dequeuing them).
+   */
+  this.toString = function(){
+    var len = this.getLength();
+    if(len==0)return "Queue(0)[empty]";
+    var str = "Queue("+len+")[";
+    for(var i=0; i < len; ++i){
+      if(i>0) str+=", \n";
+      str+='"'+queue[offset+i]+'"';
+    }
+    return str+"]";
+  };
+
+
 };
