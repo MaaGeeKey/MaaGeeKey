@@ -796,23 +796,31 @@ module.exports = function() {
 			var attachAudioEvents = function(audio, SpeechSynthesisUtterancePolyfill) {
 
 				audio.addEventListener('play', function() {
-					// console.log('SpeechSynthesis audio play');
+					console.log('SpeechSynthesis audio play');
 				}, false);
 
 				audio.addEventListener('ended', function() {
-					// console.log('SpeechSynthesis audio ended');
+					console.log('SpeechSynthesis audio ended');
 					if (SpeechSynthesisUtterancePolyfill._ended) {
 						playNext(utteranceQueue);
 					}
 				}, false);
 
 				audio.addEventListener('error', function() {
-					// console.log('SpeechSynthesis audio error');
+					console.log('SpeechSynthesis audio error');
 					playNext(utteranceQueue);
 				}, false);
 
 				audio.addEventListener('pause', function() {
-					// console.log('SpeechSynthesis audio pause');
+					console.log('SpeechSynthesis audio pause');
+				}, false);
+
+				audio.addEventListener('canplay', function() {
+					console.log('SpeechSynthesis audio canplay');
+				}, false);
+
+				audio.addEventListener('loaded', function() {
+					console.log('SpeechSynthesis audio loaded');
 				}, false);
 			};
 
@@ -850,7 +858,7 @@ module.exports = function() {
 				console.log("resume");
 				console.log(audio);
 				if (audio.src) {
-					setTimeout(function(){audio.play();},10000);
+					audio.play();
 					that.speaking = true;
 				} else {
 					playNext(utteranceQueue);
