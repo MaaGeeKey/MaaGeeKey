@@ -3,6 +3,7 @@
 
 module.exports = function() {
 	function setSource() {
+		console.log("play d_audio");
 		d_audio.play();
 	}
 
@@ -14,6 +15,7 @@ module.exports = function() {
 	}
 
 	function removeBehaviorsRestrictions() {
+		console.log("removing restrictions");
 
 		window.removeEventListener('keydown', removeBehaviorsRestrictions);
 		window.removeEventListener('mousedown', removeBehaviorsRestrictions);
