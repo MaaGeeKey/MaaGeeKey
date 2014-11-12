@@ -8,6 +8,7 @@ module.exports = function() {
 		d.style.backgroundColor = "rgba(100,100,100,0.2)";
 		d.style.width = "200px";
 		d.style.height = "200px";
+		d.style.position = "absolute";
 		former = console.log;
 
 		console.log = function(msg) {

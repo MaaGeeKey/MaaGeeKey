@@ -159,6 +159,7 @@ module.exports = function() {
 		d.style.backgroundColor = "rgba(100,100,100,0.2)";
 		d.style.width = "200px";
 		d.style.height = "200px";
+		d.style.position = "absolute";
 		former = console.log;
 
 		console.log = function(msg) {
@@ -1055,7 +1056,7 @@ module.exports = function Queue(){
    */
   this.toString = function(){
     var len = this.getLength();
-    if(len==0)return "Queue(0)[empty]";
+    if(len===0)return "Queue(0)[empty]";
     var str = "Queue("+len+")[";
     for(var i=0; i < len; ++i){
       if(i>0) str+=", \n";
