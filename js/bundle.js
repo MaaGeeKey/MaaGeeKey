@@ -149,15 +149,31 @@ module.exports = (function() {
 
 })();
 },{}],4:[function(require,module,exports){
-
 //var $ = require("jquery");
 
 module.exports = function() {
-	(function(s){
-		s.src='http://jsconsole.com/inject.js';
-		document.body.appendChild(s);
-	})(document.createElement('script'));
+	return (function consoleMirror(win, debug_div_name) {
+		var d = document.createElement("div");
+		document.body.appendChild(d);
+		d.id = debug_div_name;
+		d.style.backgroundColor = "rgba(100,100,100,0.2)";
+		d.style.width = "200px";
+		d.style.height = "200px";
+		former = console.log;
 
+		console.log = function(msg) {
+
+			former.apply(window.console, arguments);
+			var m = document.createElement("div");
+			m.innerHTML = msg;
+			d.appendChild(m);
+		};
+
+		win.onerror = function(message, url, linenumber) {
+			console.log("JavaScript error: " + message + " on line " + linenumber + " for " + url);
+		};
+		return d;
+	})(window, "d_console");
 };
 },{}],5:[function(require,module,exports){
 // include
@@ -431,12 +447,12 @@ var IOController = require("./io");
 var AudioController = require("./audioControllerUtterance");
 var screenResizeHandler = require("./system/screenSize");
 var audioPolyfill = require("./polyfill");
-var consoleMirror = require("./consoleMirror");
+var consoleMirror = require("./consoleMirrorLocal");
 
 // entry point of the program
 // done on document load
 $(function() {
-	consoleMirror();
+	window.d_console = consoleMirror();
 	audioPolyfill();
 	// bind windows resize to screenSize.js
 	$(window).resize(screenResizeHandler);
@@ -456,7 +472,7 @@ $(function() {
 	battle.start(); 
 
 });
-},{"./audioControllerUtterance":1,"./battle":2,"./consoleMirror":4,"./io":11,"./polyfill":12,"./system/screenSize":13,"jquery":16}],11:[function(require,module,exports){
+},{"./audioControllerUtterance":1,"./battle":2,"./consoleMirrorLocal":4,"./io":11,"./polyfill":12,"./system/screenSize":13,"jquery":16}],11:[function(require,module,exports){
 
 var $ = require("jquery");
 
