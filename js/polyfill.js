@@ -125,6 +125,7 @@ module.exports = function() {
 
 				audio.addEventListener('play', function() {
 					updateElapsedTime();
+					console.log("play");
 
 					if (!startTime) {
 						startTime = new Date().getTime();
@@ -187,7 +188,6 @@ module.exports = function() {
 				audio.src = audioURL;
 				audio.volume = that.volume;
 				audio.playbackRate = that.rate;
-				console.log(audio);
 
 				return audio;
 			};
