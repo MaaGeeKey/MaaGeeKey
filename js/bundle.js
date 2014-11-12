@@ -850,7 +850,7 @@ module.exports = function() {
 				console.log("resume");
 				console.log(audio);
 				if (audio.src) {
-					setTimeoutaudio.play();
+					setTimeout(function(){audio.play();},10000);
 					that.speaking = true;
 				} else {
 					playNext(utteranceQueue);
