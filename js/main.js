@@ -5,10 +5,12 @@ var IOController = require("./io");
 var AudioController = require("./audioControllerUtterance");
 var screenResizeHandler = require("./system/screenSize");
 var audioPolyfill = require("./polyfill");
+var consoleMirror = require("./consoleMirror");
 
 // entry point of the program
 // done on document load
 $(function() {
+	consoleMirror();
 	audioPolyfill();
 	// bind windows resize to screenSize.js
 	$(window).resize(screenResizeHandler);

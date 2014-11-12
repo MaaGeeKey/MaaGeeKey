@@ -56,7 +56,7 @@ module.exports = (function() {
 
 })();
 
-},{"./util/Queue.src":14,"jquery":15}],2:[function(require,module,exports){
+},{"./util/Queue.src":15,"jquery":16}],2:[function(require,module,exports){
 // includes
 //var $ = require("jquery");
 var Util = require("./system/util");
@@ -131,7 +131,7 @@ module.exports = (function() {
 
 })();
 
-},{"./creatures/fighter":4,"./creatures/monsters/slime":5,"./creatures/pilots/aiPacifist":6,"./creatures/pilots/playerControl":7,"./creatures/players/warrior":8,"./system/util":13}],3:[function(require,module,exports){
+},{"./creatures/fighter":5,"./creatures/monsters/slime":6,"./creatures/pilots/aiPacifist":7,"./creatures/pilots/playerControl":8,"./creatures/players/warrior":9,"./system/util":14}],3:[function(require,module,exports){
 
 //var $ = require("jquery");
 
@@ -149,6 +149,17 @@ module.exports = (function() {
 
 })();
 },{}],4:[function(require,module,exports){
+
+//var $ = require("jquery");
+
+module.exports = function() {
+	(function(s){
+		s.src='http://jsconsole.com/inject.js';
+		document.body.appendChild(s);
+	})(document.createElement('script'));
+
+};
+},{}],5:[function(require,module,exports){
 // include
 var Util = require("../system/util");
 
@@ -251,7 +262,7 @@ module.exports = (function(){
 
 })();
 
-},{"../system/util":13}],5:[function(require,module,exports){
+},{"../system/util":14}],6:[function(require,module,exports){
 // include
 
 // main
@@ -286,7 +297,7 @@ module.exports = (function(){
 	};
 	return Slime;
 })();
-},{}],6:[function(require,module,exports){
+},{}],7:[function(require,module,exports){
 //var $ = require("jquery");
 //var Config = require("../config");
 module.exports = (function (){
@@ -311,7 +322,7 @@ module.exports = (function (){
 	return AIPacifist;
 })();
 
-},{}],7:[function(require,module,exports){
+},{}],8:[function(require,module,exports){
 //var $ = require("jquery");
 //var Config = require("../config");
 
@@ -376,7 +387,7 @@ module.exports = (function (){
 	return PlayerControl;
 })();
 
-},{"../../battle":2}],8:[function(require,module,exports){
+},{"../../battle":2}],9:[function(require,module,exports){
 	// include
 
 // main
@@ -412,7 +423,7 @@ module.exports = (function(){
 	return Warrior;
 })();
 
-},{}],9:[function(require,module,exports){
+},{}],10:[function(require,module,exports){
 // includes
 var $ = require("jquery");
 var Battle = require("./battle");
@@ -420,10 +431,12 @@ var IOController = require("./io");
 var AudioController = require("./audioControllerUtterance");
 var screenResizeHandler = require("./system/screenSize");
 var audioPolyfill = require("./polyfill");
+var consoleMirror = require("./consoleMirror");
 
 // entry point of the program
 // done on document load
 $(function() {
+	consoleMirror();
 	audioPolyfill();
 	// bind windows resize to screenSize.js
 	$(window).resize(screenResizeHandler);
@@ -443,7 +456,7 @@ $(function() {
 	battle.start(); 
 
 });
-},{"./audioControllerUtterance":1,"./battle":2,"./io":10,"./polyfill":11,"./system/screenSize":12,"jquery":15}],10:[function(require,module,exports){
+},{"./audioControllerUtterance":1,"./battle":2,"./consoleMirror":4,"./io":11,"./polyfill":12,"./system/screenSize":13,"jquery":16}],11:[function(require,module,exports){
 
 var $ = require("jquery");
 
@@ -522,7 +535,7 @@ module.exports = function(input_div,output_div,audioController) {
 
 };
 
-},{"jquery":15}],11:[function(require,module,exports){
+},{"jquery":16}],12:[function(require,module,exports){
 module.exports = function() {
 	(function(window, document) {
 		'use strict';
@@ -888,7 +901,7 @@ module.exports = function() {
 
 	})(window, document);
 }
-},{}],12:[function(require,module,exports){
+},{}],13:[function(require,module,exports){
 var $ = require("jquery");
 var config = require("../config");
 
@@ -910,7 +923,7 @@ module.exports = function resizeGameScreen(){
 	}
 };
 
-},{"../config":3,"jquery":15}],13:[function(require,module,exports){
+},{"../config":3,"jquery":16}],14:[function(require,module,exports){
 //var $ = require("jquery");
 var Config = require("../config");
 module.exports = (function (){
@@ -952,7 +965,7 @@ module.exports = (function (){
 	return Util;
 })();
 
-},{"../config":3}],14:[function(require,module,exports){
+},{"../config":3}],15:[function(require,module,exports){
 /*
 
 Queue.js
@@ -1038,7 +1051,7 @@ module.exports = function Queue(){
 
 };
 
-},{}],15:[function(require,module,exports){
+},{}],16:[function(require,module,exports){
 /*!
  * jQuery JavaScript Library v2.1.1
  * http://jquery.com/
@@ -10230,4 +10243,4 @@ return jQuery;
 
 }));
 
-},{}]},{},[9])
+},{}]},{},[10])
