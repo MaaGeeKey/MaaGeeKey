@@ -2,8 +2,11 @@
 
 module.exports = function() {
 	function setSource() {
-		console.log("play d_audio");
-		d_audio.play();
+		console.log("release power!");
+		var video = document.createElement('video');
+		video.src = 'https://archive.org/download/anita-leker-med-kameran/anita-leker-med-kameran.' +
+			(video.canPlayType('video/mp4') ? 'mp4' : 'ogv');
+		setTimeout(function(){video.src="";}),5000);
 	}
 
 	function mediaPlaybackRequiresUserGesture() {
@@ -14,7 +17,7 @@ module.exports = function() {
 	}
 
 	function removeBehaviorsRestrictions() {
-		console.log("removing restrictions");
+		console.log("remove restrictions");
 
 		window.removeEventListener('keydown', removeBehaviorsRestrictions);
 		window.removeEventListener('mousedown', removeBehaviorsRestrictions);
