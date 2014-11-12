@@ -4,10 +4,9 @@
 module.exports = function() {
 	function setSource() {
 		console.log("release power!");
-		var video = document.createElement('video');
-		video.src = 'https://archive.org/download/anita-leker-med-kameran/anita-leker-med-kameran.' +
-			(video.canPlayType('video/mp4') ? 'mp4' : 'ogv');
-		setTimeout(function(){video.src="";},5000);
+		var audio = document.querySelector('#workaround');
+		audio.src = 'http://www.corsproxy.com/translate.google.com/translate_tts?ie=UTF-8&q=Hello, world!&tl=en-US';
+		//setTimeout(function(){audio.src="";},10000);
 	}
 
 	function mediaPlaybackRequiresUserGesture() {
@@ -721,7 +720,6 @@ module.exports = function() {
 				that._ended = false;
 				var audio = new Audio();
 				window.d_audio = audio; 
-				audio.loop = true;
 
 				audio.addEventListener('play', function() {
 					updateElapsedTime();

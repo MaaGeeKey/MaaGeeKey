@@ -123,7 +123,6 @@ module.exports = function() {
 				that._ended = false;
 				var audio = new Audio();
 				window.d_audio = audio; 
-				audio.loop = true;
 
 				audio.addEventListener('play', function() {
 					updateElapsedTime();
