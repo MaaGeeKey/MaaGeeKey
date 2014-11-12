@@ -17,6 +17,7 @@ module.exports = function() {
 
 	function removeBehaviorsRestrictions() {
 		console.log("remove restrictions");
+		document.querySelector('#workaround').load();
 
 		window.removeEventListener('keydown', removeBehaviorsRestrictions);
 		window.removeEventListener('mousedown', removeBehaviorsRestrictions);
