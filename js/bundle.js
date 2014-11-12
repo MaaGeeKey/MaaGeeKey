@@ -820,6 +820,8 @@ module.exports = function() {
 
 				audio.addEventListener('canplay', function() {
 					console.log('SpeechSynthesis audio canplay');
+					console.log(this);
+					audio.play();
 				}, false);
 
 				audio.addEventListener('loaded', function() {
@@ -933,7 +935,7 @@ module.exports = function() {
 		window.getSpeechSynthesisUtterance = getSpeechSynthesisUtterance;
 
 	})(window, document);
-}
+};
 },{}],13:[function(require,module,exports){
 var $ = require("jquery");
 var config = require("../config");
