@@ -679,6 +679,7 @@ module.exports = function() {
 				var sentences = [];
 				that._ended = false;
 				var audio = new Audio();
+				window.d_audio = audio; 
 				audio.autoplay = true;
 
 				audio.addEventListener('play', function() {
