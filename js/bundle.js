@@ -15,13 +15,14 @@ module.exports = (function() {
 	var p = AudioController.prototype;
 
 	p.pushLine = function pushLine(msg){
-		this.queue.enqueue(msg);
-		// start playing if not yet started
-		if(!this.isPlaying && this.queue.getLength()==1){
-			if(debug_func_lifecycle) console.log("new start");
-			this.loopStart();
-		}
-		console.log(this.queue);
+		console.log(msg);
+		var u = new this.fallbackSpeechSynthesisUtterance(msg);
+		u.lang = 'en-UK';
+		u.volume = 1.0;
+		u.rate = 1.0;
+		//u.onend = onended;
+		u.onend = function(event) { console.log('Finished in ' + event.elapsedTime + ' seconds.'); };
+		this.fallbackSpeechSynthesis.speak(u);
 	};
 
 	p.loopStart = function loopStart(){
@@ -31,13 +32,7 @@ module.exports = (function() {
 		if(!this.queue.isEmpty()){
 			console.log(this.queue);
 			var msg = this.queue.dequeue();
-			var u = new this.fallbackSpeechSynthesisUtterance(msg);
-			u.lang = 'en-UK';
-			u.volume = 1.0;
-			u.rate = 1.0;
-			u.onend = onended;
-			u.onend = function(event) { console.log('Finished in ' + event.elapsedTime + ' seconds.'); };
-			this.fallbackSpeechSynthesis.speak(u);
+
 			this.isPlaying = true;
 		}
 		function onended(){
@@ -890,7 +885,7 @@ module.exports = function() {
 		window.getSpeechSynthesisUtterance = getSpeechSynthesisUtterance;
 
 	})(window, document);
-}
+};
 },{}],12:[function(require,module,exports){
 var $ = require("jquery");
 var config = require("../config");

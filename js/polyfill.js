@@ -362,4 +362,4 @@ module.exports = function() {
 		window.getSpeechSynthesisUtterance = getSpeechSynthesisUtterance;
 
 	})(window, document);
-}
+};
