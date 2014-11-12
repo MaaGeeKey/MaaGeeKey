@@ -29,6 +29,7 @@ module.exports = (function() {
 		if(!this.queue.isEmpty()){
 			var msg = this.queue.dequeue();
 			var u = new this.fallbackSpeechSynthesisUtterance(msg);
+			console.log(u);
 			u.lang = 'en-UK';
 			u.volume = 1.0;
 			u.rate = 1.0;

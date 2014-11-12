@@ -187,6 +187,7 @@ module.exports = function() {
 				audio.src = audioURL;
 				audio.volume = that.volume;
 				audio.playbackRate = that.rate;
+				console.log(audio);
 
 				return audio;
 			};
