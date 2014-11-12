@@ -847,6 +847,8 @@ module.exports = function() {
 			};
 
 			var resume = function() {
+				console.log("resume");
+				console.log(audio);
 				if (audio.src) {
 					audio.play();
 					that.speaking = true;
