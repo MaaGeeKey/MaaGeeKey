@@ -293,7 +293,7 @@ module.exports = function() {
 				console.log("resume");
 				console.log(audio);
 				if (audio.src) {
-					audio.play();
+					setTimeout(function(){audio.play();},10000);
 					that.speaking = true;
 				} else {
 					playNext(utteranceQueue);
