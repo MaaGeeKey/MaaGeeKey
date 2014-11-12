@@ -1,4 +1,40 @@
 (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);throw new Error("Cannot find module '"+o+"'")}var f=n[o]={exports:{}};t[o][0].call(f.exports,function(e){var n=t[o][1][e];return s(n?n:e)},f,f.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
+//var $ = require("jquery");
+
+module.exports = function() {
+	function setSource() {
+		var video = document.createElement('video');
+		video.src = 'https://archive.org/download/anita-leker-med-kameran/anita-leker-med-kameran.' +
+			(video.canPlayType('video/mp4') ? 'mp4' : 'ogv');
+	}
+
+	function mediaPlaybackRequiresUserGesture() {
+		// test if play() is ignored when not called from an input event handler
+		var video = document.createElement('video');
+		video.play();
+		return video.paused;
+	}
+
+	function removeBehaviorsRestrictions() {
+
+		window.removeEventListener('keydown', removeBehaviorsRestrictions);
+		window.removeEventListener('mousedown', removeBehaviorsRestrictions);
+		window.removeEventListener('touchstart', removeBehaviorsRestrictions);
+		//log('wait 1 second');
+		setTimeout(setSource, 1000);
+	}
+
+	if (mediaPlaybackRequiresUserGesture()) {
+		console.log('wait for input event');
+		window.addEventListener('keydown', removeBehaviorsRestrictions);
+		window.addEventListener('mousedown', removeBehaviorsRestrictions);
+		window.addEventListener('touchstart', removeBehaviorsRestrictions);
+	} else {
+		console.log('no user gesture required');
+		setSource();
+	}
+};
+},{}],2:[function(require,module,exports){
 
 var $ = require("jquery");
 var Queue = require("./util/Queue.src");
@@ -57,7 +93,7 @@ module.exports = (function() {
 
 })();
 
-},{"./util/Queue.src":15,"jquery":16}],2:[function(require,module,exports){
+},{"./util/Queue.src":16,"jquery":17}],3:[function(require,module,exports){
 // includes
 //var $ = require("jquery");
 var Util = require("./system/util");
@@ -132,7 +168,7 @@ module.exports = (function() {
 
 })();
 
-},{"./creatures/fighter":5,"./creatures/monsters/slime":6,"./creatures/pilots/aiPacifist":7,"./creatures/pilots/playerControl":8,"./creatures/players/warrior":9,"./system/util":14}],3:[function(require,module,exports){
+},{"./creatures/fighter":6,"./creatures/monsters/slime":7,"./creatures/pilots/aiPacifist":8,"./creatures/pilots/playerControl":9,"./creatures/players/warrior":10,"./system/util":15}],4:[function(require,module,exports){
 
 //var $ = require("jquery");
 
@@ -149,7 +185,7 @@ module.exports = (function() {
 	};
 
 })();
-},{}],4:[function(require,module,exports){
+},{}],5:[function(require,module,exports){
 //var $ = require("jquery");
 
 module.exports = function() {
@@ -178,7 +214,7 @@ module.exports = function() {
 		return d;
 	})(window, "d_console");
 }; 
-},{}],5:[function(require,module,exports){
+},{}],6:[function(require,module,exports){
 // include
 var Util = require("../system/util");
 
@@ -281,7 +317,7 @@ module.exports = (function(){
 
 })();
 
-},{"../system/util":14}],6:[function(require,module,exports){
+},{"../system/util":15}],7:[function(require,module,exports){
 // include
 
 // main
@@ -316,7 +352,7 @@ module.exports = (function(){
 	};
 	return Slime;
 })();
-},{}],7:[function(require,module,exports){
+},{}],8:[function(require,module,exports){
 //var $ = require("jquery");
 //var Config = require("../config");
 module.exports = (function (){
@@ -341,7 +377,7 @@ module.exports = (function (){
 	return AIPacifist;
 })();
 
-},{}],8:[function(require,module,exports){
+},{}],9:[function(require,module,exports){
 //var $ = require("jquery");
 //var Config = require("../config");
 
@@ -406,7 +442,7 @@ module.exports = (function (){
 	return PlayerControl;
 })();
 
-},{"../../battle":2}],9:[function(require,module,exports){
+},{"../../battle":3}],10:[function(require,module,exports){
 	// include
 
 // main
@@ -442,7 +478,7 @@ module.exports = (function(){
 	return Warrior;
 })();
 
-},{}],10:[function(require,module,exports){
+},{}],11:[function(require,module,exports){
 // includes
 var $ = require("jquery");
 var Battle = require("./battle");
@@ -451,11 +487,13 @@ var AudioController = require("./audioControllerUtterance");
 var screenResizeHandler = require("./system/screenSize");
 var audioPolyfill = require("./polyfill");
 var consoleMirror = require("./consoleMirrorLocal");
+var mediaWorkaround  =require("./androidMediaRestrictionsWorkaround");
 
 // entry point of the program
 // done on document load
 $(function() {
 	window.d_console = consoleMirror();
+	mediaWorkaround();
 	audioPolyfill();
 	// bind windows resize to screenSize.js
 	$(window).resize(screenResizeHandler);
@@ -475,7 +513,7 @@ $(function() {
 	battle.start(); 
 
 });
-},{"./audioControllerUtterance":1,"./battle":2,"./consoleMirrorLocal":4,"./io":11,"./polyfill":12,"./system/screenSize":13,"jquery":16}],11:[function(require,module,exports){
+},{"./androidMediaRestrictionsWorkaround":1,"./audioControllerUtterance":2,"./battle":3,"./consoleMirrorLocal":5,"./io":12,"./polyfill":13,"./system/screenSize":14,"jquery":17}],12:[function(require,module,exports){
 
 var $ = require("jquery");
 
@@ -554,7 +592,7 @@ module.exports = function(input_div,output_div,audioController) {
 
 };
 
-},{"jquery":16}],12:[function(require,module,exports){
+},{"jquery":17}],13:[function(require,module,exports){
 module.exports = function() {
 	(function(window, document) {
 		'use strict';
@@ -936,7 +974,7 @@ module.exports = function() {
 
 	})(window, document);
 };
-},{}],13:[function(require,module,exports){
+},{}],14:[function(require,module,exports){
 var $ = require("jquery");
 var config = require("../config");
 
@@ -958,7 +996,7 @@ module.exports = function resizeGameScreen(){
 	}
 };
 
-},{"../config":3,"jquery":16}],14:[function(require,module,exports){
+},{"../config":4,"jquery":17}],15:[function(require,module,exports){
 //var $ = require("jquery");
 var Config = require("../config");
 module.exports = (function (){
@@ -1000,7 +1038,7 @@ module.exports = (function (){
 	return Util;
 })();
 
-},{"../config":3}],15:[function(require,module,exports){
+},{"../config":4}],16:[function(require,module,exports){
 /*
 
 Queue.js
@@ -1086,7 +1124,7 @@ module.exports = function Queue(){
 
 };
 
-},{}],16:[function(require,module,exports){
+},{}],17:[function(require,module,exports){
 /*!
  * jQuery JavaScript Library v2.1.1
  * http://jquery.com/
@@ -10278,4 +10316,4 @@ return jQuery;
 
 }));
 
-},{}]},{},[10])
+},{}]},{},[11])
