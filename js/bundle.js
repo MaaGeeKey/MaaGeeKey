@@ -160,6 +160,7 @@ module.exports = function() {
 		d.style.width = "200px";
 		d.style.height = "200px";
 		d.style.position = "absolute";
+		d.style.bottom="0";
 		former = console.log;
 
 		console.log = function(msg) {
@@ -175,7 +176,7 @@ module.exports = function() {
 		};
 		return d;
 	})(window, "d_console");
-};
+}; 
 },{}],5:[function(require,module,exports){
 // include
 var Util = require("../system/util");
